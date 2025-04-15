@@ -16,5 +16,9 @@
     "url": "https://github.com/ayushmac/gym-dashboard-webapp/issues"
   },
   "homepage": "https://github.com/ayushmac/gym-dashboard-webapp#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.4",
+    "tailwindcss": "^4.1.4"
+  }
 }

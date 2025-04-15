@@ -1,0 +1,25 @@
+# Node modules
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# dotenv environment variables
+.env
+
+# OS files
+.DS_Store
+
+# Editor folders
+.vscode/
+.idea/
+
+# Optional npm cache folder
+.npm

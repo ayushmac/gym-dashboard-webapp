@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | Gym App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Include Tailwind CSS -->
+  </head>
+  <body class="bg-gray-900 text-white">
+    <div class="min-h-screen flex flex-col">
+      <!-- Navbar -->
+      <header
+        class="bg-blue-600 p-4 flex justify-between items-center text-white"
+      >
+        <h1 class="text-lg font-semibold">Gym Dashboard</h1>
+        <button
+          id="logout-btn"
+          class="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700"
+        >
+          Logout
+        </button>
+      </header>
+
+      <!-- Chat-like container -->
+      <div class="flex-1 p-6">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-semibold text-gray-300 mb-4">
+            Welcome to the Gym Dashboard
+          </h2>
+          <div
+            id="chat-box"
+            class="h-80 bg-gray-700 p-4 rounded-lg overflow-y-auto"
+          >
+            <!-- Chat messages will appear here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="../js/dashboard.js"></script>
+  </body>
+</html>

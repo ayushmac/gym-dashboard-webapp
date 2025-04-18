@@ -5,56 +5,190 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login | Gym App</title>
     <link href="./css/output.css" rel="stylesheet" />
-    <!-- Include Tailwind CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
   </head>
-  <body
-    class="bg-gray-900 text-white flex justify-center items-center min-h-screen dark"
-  >
-    <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md">
-      <h2 class="text-2xl font-semibold text-center text-gray-300 mb-6">
-        Dashboard Login
-      </h2>
-      <form id="login-form">
-        <div class="mb-4">
-          <label for="email" class="block text-sm font-medium text-gray-400"
-            >Email</label
+  <body class="bg-gray-900 text-white min-h-screen dark">
+    <div class="flex justify-center items-center min-h-screen p-4">
+      <div class="bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center text-gray-300 mb-6">
+          Gym Management System
+        </h2>
+
+        <!-- Tabs Navigation -->
+        <div class="flex border-b border-gray-700 mb-6">
+          <button
+            id="admin-tab"
+            class="flex-1 py-2 px-4 font-medium text-center border-b-2 border-blue-500 text-blue-400 cursor-pointer transition-colors duration-200"
+            onclick="switchTab('admin')"
           >
-          <input
-            type="email"
-            id="email"
-            name="email"
-            class="w-full p-3 mt-2 border border-gray-700 rounded-lg bg-gray-600 text-white"
-            placeholder="Enter your email"
-            required
-          />
-        </div>
-        <div class="mb-6">
-          <label for="password" class="block text-sm font-medium text-gray-400"
-            >Password</label
+            <i class="fas fa-user-shield mr-2"></i>Admin
+          </button>
+          <button
+            id="member-tab"
+            class="flex-1 py-2 px-4 font-medium text-center border-b-2 border-transparent text-gray-400 hover:text-gray-300 cursor-pointer transition-colors duration-200"
+            onclick="switchTab('member')"
           >
-          <input
-            type="password"
-            id="password"
-            name="password"
-            class="w-full p-3 mt-2 border border-gray-700 rounded-lg bg-gray-600 text-white"
-            placeholder="Enter your password"
-            required
-          />
+            <i class="fas fa-user mr-2"></i>Member
+          </button>
+          <button
+            id="trainer-tab"
+            class="flex-1 py-2 px-4 font-medium text-center border-b-2 border-transparent text-gray-400 hover:text-gray-300 cursor-pointer transition-colors duration-200"
+            onclick="switchTab('trainer')"
+          >
+            <i class="fas fa-dumbbell mr-2"></i>Trainer
+          </button>
         </div>
-        <button
-          type="submit"
-          class="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+
+        <!-- Toast Notification Container -->
+        <div id="toast" class="fixed top-4 right-4 z-50 hidden">
+          <div
+            class="bg-gray-800 text-white px-4 py-3 rounded-lg shadow-lg flex items-start max-w-xs border-l-4"
+            id="toast-box"
+          >
+            <i class="fas fa-info-circle mt-1 mr-2" id="toast-icon"></i>
+            <div><p id="toast-message" class="text-sm"></p></div>
+            <button
+              onclick="hideToast()"
+              class="ml-4 text-white hover:text-gray-200 cursor-pointer"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Loader -->
+        <div
+          id="loader"
+          class="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 z-50 hidden"
         >
-          Login
-        </button>
-        <p
-          id="error-message"
-          class="text-red-500 text-sm text-center mt-4"
-          style="display: none"
-        >
-          Invalid credentials. Please try again.
-        </p>
-      </form>
+          <div
+            class="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"
+          ></div>
+        </div>
+
+        <!-- Admin Login Form -->
+        <form id="admin-form" class="login-form">
+          <div class="mb-4">
+            <label
+              for="admin-email"
+              class="block text-sm font-medium text-gray-400 mb-1"
+              >Email</label
+            >
+            <input
+              type="email"
+              id="admin-email"
+              name="email"
+              class="w-full p-3 border border-gray-700 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="admin@example.com"
+              required
+            />
+          </div>
+          <div class="mb-6">
+            <label
+              for="admin-password"
+              class="block text-sm font-medium text-gray-400 mb-1"
+              >Password</label
+            >
+            <input
+              type="password"
+              id="admin-password"
+              name="password"
+              class="w-full p-3 border border-gray-700 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition cursor-pointer"
+          >
+            Login as Admin
+          </button>
+        </form>
+
+        <!-- Member Login Form -->
+        <form id="member-form" class="login-form hidden">
+          <div class="mb-4">
+            <label
+              for="member-email"
+              class="block text-sm font-medium text-gray-400 mb-1"
+              >Email</label
+            >
+            <input
+              type="email"
+              id="member-email"
+              name="email"
+              class="w-full p-3 border border-gray-700 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="member@example.com"
+              required
+            />
+          </div>
+          <div class="mb-6">
+            <label
+              for="member-password"
+              class="block text-sm font-medium text-gray-400 mb-1"
+              >Password</label
+            >
+            <input
+              type="password"
+              id="member-password"
+              name="password"
+              class="w-full p-3 border border-gray-700 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition cursor-pointer"
+          >
+            Login as Member
+          </button>
+        </form>
+
+        <!-- Trainer Login Form -->
+        <form id="trainer-form" class="login-form hidden">
+          <div class="mb-4">
+            <label
+              for="trainer-email"
+              class="block text-sm font-medium text-gray-400 mb-1"
+              >Email</label
+            >
+            <input
+              type="email"
+              id="trainer-email"
+              name="email"
+              class="w-full p-3 border border-gray-700 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="trainer@example.com"
+              required
+            />
+          </div>
+          <div class="mb-6">
+            <label
+              for="trainer-password"
+              class="block text-sm font-medium text-gray-400 mb-1"
+              >Password</label
+            >
+            <input
+              type="password"
+              id="trainer-password"
+              name="password"
+              class="w-full p-3 border border-gray-700 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition cursor-pointer"
+          >
+            Login as Trainer
+          </button>
+        </form>
+      </div>
     </div>
 
     <script type="module" src="js/login.js"></script>

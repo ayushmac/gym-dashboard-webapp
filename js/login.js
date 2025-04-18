@@ -1,49 +1,102 @@
 import { database, ref, get } from "./firebase-config.js";
 
-document
-  .getElementById("login-form")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
+// On page load, set admin tab
+document.addEventListener("DOMContentLoaded", () => switchTab("admin"));
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    validateLogin(email, password);
+// Tab switching
+window.switchTab = function (tab) {
+  document
+    .querySelectorAll(".login-form")
+    .forEach((form) => form.classList.add("hidden"));
+  document.querySelectorAll('[id$="-tab"]').forEach((el) => {
+    el.classList.remove("border-blue-500", "text-blue-400");
+    el.classList.add("border-transparent", "text-gray-400");
   });
 
-function validateLogin(email, password) {
+  document.getElementById(`${tab}-form`).classList.remove("hidden");
+  const tabEl = document.getElementById(`${tab}-tab`);
+  tabEl.classList.add("border-blue-500", "text-blue-400");
+  tabEl.classList.remove("border-transparent", "text-gray-400");
+};
+
+// Toast utility
+window.showToast = function (message, type = "info") {
+  const toast = document.getElementById("toast");
+  const toastBox = document.getElementById("toast-box");
+  const toastIcon = document.getElementById("toast-icon");
+  const toastMessage = document.getElementById("toast-message");
+
+  toastMessage.textContent = message;
+
+  // Styling
+  if (type === "error") {
+    toastBox.classList.replace("border-l-4", "border-l-4");
+    toastBox.classList.add("border-red-500");
+    toastIcon.className = "fas fa-exclamation-circle text-red-500 mt-1 mr-2";
+  } else if (type === "success") {
+    toastBox.classList.replace("border-l-4", "border-l-4");
+    toastBox.classList.add("border-green-500");
+    toastIcon.className = "fas fa-check-circle text-green-500 mt-1 mr-2";
+  } else {
+    toastBox.classList.replace("border-l-4", "border-l-4");
+    toastBox.classList.add("border-blue-500");
+    toastIcon.className = "fas fa-info-circle text-blue-500 mt-1 mr-2";
+  }
+
+  toast.classList.remove("hidden");
+  setTimeout(() => toast.classList.add("hidden"), 4000);
+};
+
+window.hideToast = () =>
+  document.getElementById("toast").classList.add("hidden");
+
+function toggleLoader(show) {
+  document.getElementById("loader").classList.toggle("hidden", !show);
+}
+
+// Admin Login
+document.getElementById("admin-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const email = document.getElementById("admin-email").value;
+  const password = document.getElementById("admin-password").value;
+  toggleLoader(true);
+  validateAdminLogin(email, password);
+});
+
+function validateAdminLogin(email, password) {
   const loginRef = ref(database, "/admin/login");
 
   get(loginRef)
     .then((snapshot) => {
+      toggleLoader(false);
+
       if (snapshot.exists()) {
         const credentials = snapshot.val();
-
-        // Console log the fetched email and password
-        // console.log(`Fetched email: ${credentials.email}`);
-        // console.log(`Fetched password: ${credentials.password}`);
-
-        // Uncomment the line below to show an alert with the username and password (useful for debugging)
-        alert(
-          `Fetched Email: ${credentials.email}\nFetched Password: ${credentials.password}`
-        );
-
-        // Check if the entered email and password match the database values
         if (credentials.email === email && credentials.password === password) {
-          // If credentials match, redirect to dashboard
-          window.location.href = "/dashboard/dashboard.html";
+          showToast("Login successful! Redirecting...", "success");
+          setTimeout(() => {
+            window.location.href = "/dashboard/dashboard.html";
+          }, 1500);
         } else {
-          // Show error message if login fails
-          document.getElementById("error-message").style.display = "block";
-          alert("Invalid credentials. Please try again.");
+          showToast("Invalid credentials. Please try again.", "error");
         }
       } else {
-        console.log("No login data found in database.");
-        alert("No login data found.");
+        showToast("No admin credentials found in database.", "error");
       }
     })
     .catch((error) => {
+      toggleLoader(false);
       console.error(error);
-      alert("An error occurred. Please try again later.");
+      showToast("An error occurred. Please try again later.", "error");
     });
 }
+
+// Placeholder for member/trainer
+document.getElementById("member-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  showToast("Member login functionality coming soon!", "info");
+});
+document.getElementById("trainer-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  showToast("Trainer login functionality coming soon!", "info");
+});

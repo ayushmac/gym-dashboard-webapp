@@ -75,7 +75,7 @@ function validateAdminLogin(email, password) {
         if (credentials.email === email && credentials.password === password) {
           showToast("Login successful! Redirecting...", "success");
           setTimeout(() => {
-            window.location.href = "/dashboard/dashboard.html";
+            window.location.href = "/dashboard/admindashboard.html";
           }, 1500);
         } else {
           showToast("Invalid credentials. Please try again.", "error");

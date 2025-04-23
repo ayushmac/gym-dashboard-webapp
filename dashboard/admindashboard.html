@@ -86,13 +86,141 @@
             </div>
           </div>
         </section>
+        
 
-        <section id="member-plans" class="tab-content hidden">
-          <h1 class="text-2xl font-bold text-white mb-6">Manage Member Plans</h1>
-          <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
-            <p>Manage all member subscription plans here.</p>
-          </div>
-        </section>
+        <!-- plans section here -->
+        <!-- ────────────────────────── Member Plans tab ────────────────────────── -->
+<section id="member-plans" class="tab-content hidden">
+  <h1 class="text-2xl font-bold text-white mb-6">Manage Member Plans</h1>
+
+  <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+    <!-- Search + Add -->
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+      <input id="search-input"
+             type="text"
+             placeholder="Search by plan name…"
+             class="flex-1 p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400">
+      <button id="add-plan-btn"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+        Add Plan
+      </button>
+    </div>
+
+    <!-- Plans table -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left text-gray-200">
+        <thead class="uppercase text-xs bg-gray-700">
+          <tr>
+            <th class="px-3 py-2">Plan</th>
+            <th class="px-3 py-2">Description</th>
+            <th class="px-3 py-2">Trainer?</th>
+            <th class="px-3 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="plans-table-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="flex justify-between mt-4">
+      <button id="prev-btn"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-40"
+              disabled>Prev</button>
+      <button id="next-btn"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-40">
+        Next</button>
+    </div>
+  </div>
+
+  <!-- Add / Edit modal -->
+  <div id="add-plan-modal"
+       class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+    <div class="bg-gray-800 w-11/12 max-w-md rounded-xl p-6 shadow-2xl">
+      <h2 id="modal-title" class="text-xl font-semibold text-white mb-4">Add Plan</h2>
+
+      <form id="add-plan-form" class="space-y-4">
+        <!-- Plan name -->
+        <div>
+          <label for="plan-name" class="block mb-1 text-sm text-gray-300">Plan name</label>
+          <input id="plan-name" required
+                 class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400">
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label for="plan-description" class="block mb-1 text-sm text-gray-300">Description</label>
+          <textarea id="plan-description" required rows="3"
+                    class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"></textarea>
+        </div>
+
+        <!-- Amount -->
+        <div>
+          <label for="plan-amount" class="block mb-1 text-sm text-gray-300">Amount (₹)</label>
+          <input id="plan-amount" type="number" min="0" required
+                 class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400">
+        </div>
+
+        <!-- Includes trainer -->
+        <div class="flex items-center gap-2">
+          <input id="includes-trainer" type="checkbox" class="h-4 w-4">
+          <label for="includes-trainer" class="text-sm text-gray-300">Includes trainer</label>
+        </div>
+
+        <!-- Trainer duration (wrapper toggled by JS) -->
+        <div id="trainer-duration-wrap" class="hidden">
+          <label for="trainer-duration" class="block mb-1 text-sm text-gray-300">
+            Trainer duration
+          </label>
+          <select id="trainer-duration"
+                  class="w-full p-2 rounded-lg bg-gray-700 text-white">
+            <option value="1">1 month</option>
+            <option value="3">3 months</option>
+            <option value="6">6 months</option>
+            <option value="12">12 months</option>
+          </select>
+        </div>
+
+        <!-- Plan duration -->
+        <div>
+          <label for="plan-duration" class="block mb-1 text-sm text-gray-300">Plan duration</label>
+          <select id="plan-duration" required
+                  class="w-full p-2 rounded-lg bg-gray-700 text-white">
+            <option value="1">1 month</option>
+            <option value="3">3 months</option>
+            <option value="6">6 months</option>
+            <option value="12">12 months</option>
+          </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex justify-between pt-2">
+          <button type="submit"
+                  class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+            Save
+          </button>
+          <button type="button" id="close-modal"
+                  class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- View‑only modal -->
+  <div id="view-plan-modal"
+       class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+    <div class="bg-gray-800 w-11/12 max-w-md rounded-xl p-6 shadow-2xl">
+      <h2 class="text-xl font-semibold text-white mb-4">Plan details</h2>
+      <div id="view-content" class="space-y-2 text-gray-200 text-sm"></div>
+      <button id="close-view"
+              class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg w-full">
+        Close
+      </button>
+    </div>
+  </div>
+</section>
+<!-- ─────────────────────────────────────────────────────────────────────── -->
 
         <section id="trainers" class="tab-content hidden">
           <h1 class="text-2xl font-bold text-white mb-6">Manage Trainers</h1>
@@ -150,5 +278,6 @@
 
   <script src="../js/admindashboard.js"></script>
   <script src="../js/logout.js"></script>
+  <script type="module" src="../js/manageplans.js"></script>
 </body>
 </html>

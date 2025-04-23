@@ -1,11 +1,12 @@
-// firebase.js
-
 // Import the necessary functions from Firebase SDK
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import {
   getDatabase,
   ref,
   get,
+  set,
+  push,
+  child // Import the 'child' function to access specific child nodes
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
 // Firebase configuration
@@ -27,5 +28,5 @@ const app = initializeApp(firebaseConfig);
 // Get a reference to the Firebase Realtime Database
 const database = getDatabase(app);
 
-// Export the initialized database object along with `ref` and `get`
-export { database, ref, get };
+// Export the initialized database object along with ref, get, set, push, and child
+export { database, ref, get, set, push, child };

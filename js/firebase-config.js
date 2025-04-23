@@ -6,15 +6,15 @@ import {
   get,
   set,
   push,
-  child // Import the 'child' function to access specific child nodes
+  child,
+  onValue // Import the onValue function from Firebase SDK
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBb5FqDuZCK_GDl86y8krdffNeTLd1ImSg",
   authDomain: "gym-dashboard-web-app-cd3dd.firebaseapp.com",
-  databaseURL:
-    "https://gym-dashboard-web-app-cd3dd-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL: "https://gym-dashboard-web-app-cd3dd-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "gym-dashboard-web-app-cd3dd",
   storageBucket: "gym-dashboard-web-app-cd3dd.firebasestorage.app",
   messagingSenderId: "95787041527",
@@ -28,5 +28,5 @@ const app = initializeApp(firebaseConfig);
 // Get a reference to the Firebase Realtime Database
 const database = getDatabase(app);
 
-// Export the initialized database object along with ref, get, set, push, and child
-export { database, ref, get, set, push, child };
+// Export the necessary functions from Firebase
+export { database, ref, get, set, push, child, onValue }; // Export onValue here

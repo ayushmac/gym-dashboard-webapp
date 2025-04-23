@@ -60,6 +60,7 @@ const render = (rows) => {
     tr.innerHTML = `
       <td class="px-3 py-2">${p.plan_name}</td>
       <td class="px-3 py-2 truncate max-w-xs">${p.plan_description}</td>
+        <td class="px-3 py-2">${p.plan_duration} month/s</td>
       <td class="px-3 py-2">${p.includes_trainer}</td>
       <td class="px-3 py-2 space-x-2">
         <button data-view="${uid}" class="text-yellow-500">View</button>
@@ -102,8 +103,8 @@ const viewPlan = async uid => {
     <p><span class="font-semibold">Description:</span> ${p.plan_description}</p>
     <p><span class="font-semibold">Amount:</span> ₹${p.plan_amount}</p>
     <p><span class="font-semibold">Includes trainer:</span> ${p.includes_trainer}</p>
-    <p><span class="font-semibold">Trainer duration:</span> ${p.trainer_duration || '-' } months</p>
-    <p><span class="font-semibold">Plan duration:</span> ${p.plan_duration} months</p>`;
+    <p><span class="font-semibold">Trainer duration:</span> ${p.trainer_duration || '-' } month/s</p>
+    <p><span class="font-semibold">Plan duration:</span> ${p.plan_duration} month/s</p>`;
   show(viewModal);
 };
 

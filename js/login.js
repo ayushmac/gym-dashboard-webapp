@@ -73,6 +73,8 @@ function validateAdminLogin(email, password) {
       if (snapshot.exists()) {
         const credentials = snapshot.val();
         if (credentials.email === email && credentials.password === password) {
+          // 🔹 remember auth
+          localStorage.setItem("isAdminAuth", "true");
           showToast("Login successful! Redirecting...", "success");
           setTimeout(() => {
             window.location.href = "/dashboard/admindashboard.html";

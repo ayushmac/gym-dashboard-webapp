@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const sidebar = document.getElementById('sidebar');
   const tabLinks = document.querySelectorAll('.sidebar-tab');
   const tabContents = document.querySelectorAll('.tab-content');
-
+  
   // Function to open sidebar
   function openSidebar() {
     sidebar.classList.remove('-translate-x-full');

@@ -10,6 +10,7 @@
    const closeBtn      = document.getElementById('close-modal');
    const form          = document.getElementById('add-plan-form');
    const tblBody       = document.getElementById('plans-table-body');
+   const tblHead       = document.querySelector('thead');
    const prevBtn       = document.getElementById('prev-btn');
    const nextBtn       = document.getElementById('next-btn');
    const trainerChk    = document.getElementById('includes-trainer');
@@ -66,12 +67,14 @@
      if (rows.length === 0) {
        show(noRecordsMsg);
        hide(tblBody);
+       hide(tblHead);
        hide(document.querySelector('#pagination'));
        return;
      }
      
      hide(noRecordsMsg);
      show(tblBody);
+     show(tblHead);
      show(document.querySelector('#pagination'));
      
      const slice = rows.slice((currentPage-1)*pageSize, currentPage*pageSize);

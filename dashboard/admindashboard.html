@@ -24,81 +24,85 @@
         <i class="fas fa-bars text-xl text-white"></i>
       </div>
 
-      <!-- Sidebar -->
       <aside
         id="sidebar"
-        class="min-h-screen w-64 fixed top-0 left-0 transform -translate-x-full transition-transform duration-300 ease-in-out z-40 bg-gray-800 border-r border-gray-700"
+        class="fixed top-0 left-0 h-screen w-64 -translate-x-full transform bg-gray-800 border-r border-gray-700 transition-transform duration-300 ease-in-out z-40"
       >
-        <div class="min-h-screen w-full flex flex-col">
+        <div class="flex h-screen flex-col">
+          <!-- Header -->
           <div
-            class="flex justify-between items-center p-4 border-b border-gray-700"
+            class="flex items-center justify-between border-b border-gray-700 p-4"
           >
-            <div class="font-bold text-xl text-white">Gym Dashboard</div>
+            <div class="text-xl font-bold text-white">Gym Dashboard</div>
             <!-- Close Button (X) -->
             <div
               id="close-btn"
-              class="bg-gray-700 rounded-xl p-2 w-10 h-10 flex items-center justify-center cursor-pointer hover:bg-gray-600 transition-colors"
+              class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-gray-700 p-2 transition-colors hover:bg-gray-600"
             >
               <span class="text-white">X</span>
             </div>
           </div>
-          <div
-            class="links-container flex flex-col p-4 space-y-2 flex-grow overflow-y-auto"
-          >
-            <div
-              data-tab="overview"
-              class="sidebar-tab cursor-pointer hover:bg-gray-700 p-3 rounded-lg text-gray-300 hover:text-white transition-colors flex items-center"
-            >
-              <i class="fas fa-chart-bar mr-3 text-indigo-400"></i>
-              <span>Stats Overview</span>
-            </div>
-            <div
-              data-tab="member-plans"
-              class="sidebar-tab cursor-pointer hover:bg-gray-700 p-3 rounded-lg text-gray-300 hover:text-white transition-colors flex items-center"
-            >
-              <i class="fas fa-id-card mr-3 text-indigo-400"></i>
-              <span>Manage Member Plans</span>
-            </div>
-            <div
-              data-tab="trainers"
-              class="sidebar-tab cursor-pointer hover:bg-gray-700 p-3 rounded-lg text-gray-300 hover:text-white transition-colors flex items-center"
-            >
-              <i class="fas fa-dumbbell mr-3 text-indigo-400"></i>
-              <span>Manage Trainers</span>
-            </div>
-            <div
-              data-tab="staff"
-              class="sidebar-tab cursor-pointer hover:bg-gray-700 p-3 rounded-lg text-gray-300 hover:text-white transition-colors flex items-center"
-            >
-              <i class="fas fa-users mr-3 text-indigo-400"></i>
-              <span>Manage Staff</span>
-            </div>
-            <div
-              data-tab="members"
-              class="sidebar-tab cursor-pointer hover:bg-gray-700 p-3 rounded-lg text-gray-300 hover:text-white transition-colors flex items-center"
-            >
-              <i class="fas fa-user-friends mr-3 text-indigo-400"></i>
-              <span>Manage Members</span>
-            </div>
-            <div
-              data-tab="payments"
-              class="sidebar-tab cursor-pointer hover:bg-gray-700 p-3 rounded-lg text-gray-300 hover:text-white transition-colors flex items-center"
-            >
-              <i class="fas fa-credit-card mr-3 text-indigo-400"></i>
-              <span>Manage Member Payments</span>
-            </div>
-            <div
-              data-tab="import-data"
-              class="sidebar-tab cursor-pointer hover:bg-gray-700 p-3 rounded-lg text-gray-300 hover:text-white transition-colors flex items-center"
-            >
-              <i class="fas fa-file-import mr-3 text-indigo-400"></i>
-              <span>Import Data</span>
+
+          <!-- Scrollable Links Container -->
+          <div class="flex-1 overflow-y-auto overflow-x-hidden py-4">
+            <div class="space-y-2 px-4">
+              <div
+                data-tab="overview"
+                class="sidebar-tab flex cursor-pointer items-center rounded-lg p-3 text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+              >
+                <i class="fas fa-chart-bar mr-3 text-indigo-400"></i>
+                <span>Stats Overview</span>
+              </div>
+              <div
+                data-tab="member-plans"
+                class="sidebar-tab flex cursor-pointer items-center rounded-lg p-3 text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+              >
+                <i class="fas fa-id-card mr-3 text-indigo-400"></i>
+                <span>Manage Member Plans</span>
+              </div>
+              <div
+                data-tab="trainers"
+                class="sidebar-tab flex cursor-pointer items-center rounded-lg p-3 text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+              >
+                <i class="fas fa-dumbbell mr-3 text-indigo-400"></i>
+                <span>Manage Trainers</span>
+              </div>
+              <div
+                data-tab="staff"
+                class="sidebar-tab flex cursor-pointer items-center rounded-lg p-3 text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+              >
+                <i class="fas fa-users mr-3 text-indigo-400"></i>
+                <span>Manage Staff</span>
+              </div>
+              <div
+                data-tab="members"
+                class="sidebar-tab flex cursor-pointer items-center rounded-lg p-3 text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+              >
+                <i class="fas fa-user-friends mr-3 text-indigo-400"></i>
+                <span>Manage Members</span>
+              </div>
+              <div
+                data-tab="payments"
+                class="sidebar-tab flex cursor-pointer items-center rounded-lg p-3 text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+              >
+                <i class="fas fa-credit-card mr-3 text-indigo-400"></i>
+                <span>Manage Member Payments</span>
+              </div>
+              <div
+                data-tab="import-data"
+                class="sidebar-tab flex cursor-pointer items-center rounded-lg p-3 text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+              >
+                <i class="fas fa-file-import mr-3 text-indigo-400"></i>
+                <span>Import Data</span>
+              </div>
             </div>
           </div>
-          <div class="logout-btn-container p-4 border-t border-gray-700">
+
+          <!-- Logout Button -->
+          <div class="border-t border-gray-700 p-4">
             <button
               id="logout-btn"
-              class="text-white bg-red-600 w-full py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+              class="flex w-full items-center justify-center rounded-lg bg-red-600 py-3 text-white transition-colors hover:bg-red-700"
             >
               <i class="fas fa-sign-out-alt mr-2"></i>
               <span>Logout</span>

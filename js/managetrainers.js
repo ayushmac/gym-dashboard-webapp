@@ -275,17 +275,20 @@ document.addEventListener("DOMContentLoaded", function () {
       password: document.getElementById("trainer-password").value,
       imageUrl: currentImageFile?.url || "",
       deleteUrl: currentImageFile?.deleteUrl || "",
+      trainers_uid: "", // Will be set below
     };
 
     try {
       if (isEditing && currentEditId) {
         // Update existing trainer
+        formData.trainers_uid = currentEditId;
         const trainerRef = ref(database, `trainers/${currentEditId}`);
         await update(trainerRef, formData);
         showToast("Trainer updated successfully", "success");
       } else {
         // Add new trainer
         const newTrainerRef = push(trainersRef);
+        formData.trainers_uid = newTrainerRef.key;
         await set(newTrainerRef, formData);
         showToast("Trainer added successfully", "success");
       }

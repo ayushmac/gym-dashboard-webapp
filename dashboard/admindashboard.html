@@ -423,7 +423,7 @@
           <!-- trainers section -->
           <section id="trainers" class="tab-content hidden">
             <h1 class="text-2xl font-bold text-white mb-6">Manage Trainers</h1>
-
+          
             <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
               <!-- Search + Add -->
               <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
@@ -449,7 +449,7 @@
                   <i class="fas fa-plus"></i> Add Trainer
                 </button>
               </div>
-
+          
               <!-- Trainers table -->
               <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left text-gray-200">
@@ -478,7 +478,7 @@
                   </p>
                 </div>
               </div>
-
+          
               <!-- Pagination -->
               <div
                 id="trainers-pagination-container"
@@ -499,7 +499,7 @@
                 </button>
               </div>
             </div>
-
+          
             <!-- Add / Edit modal -->
             <div
               id="add-trainer-modal"
@@ -514,27 +514,8 @@
                 >
                   Add Trainer
                 </h2>
-
+          
                 <form id="add-trainer-form" class="space-y-4">
-                  <!-- Trainer image -->
-                  <div>
-                    <label class="block mb-1 text-sm text-gray-300"
-                      >Photo</label
-                    >
-                    <input
-                      id="trainer-image"
-                      type="file"
-                      accept="image/*"
-                      class="w-full p-2 rounded-lg bg-gray-700 text-white file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-500 file:text-white hover:file:bg-indigo-600"
-                    />
-                    <div class="mt-2 flex justify-center">
-                      <img
-                        id="image-preview"
-                        class="hidden max-h-40 rounded-lg"
-                      />
-                    </div>
-                  </div>
-
                   <!-- Name -->
                   <div>
                     <label
@@ -548,7 +529,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-
+          
                   <!-- Email -->
                   <div>
                     <label
@@ -563,7 +544,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-
+          
                   <!-- Mobile -->
                   <div>
                     <label
@@ -578,7 +559,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-
+          
                   <!-- Age -->
                   <div>
                     <label
@@ -595,7 +576,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-
+          
                   <!-- Experience -->
                   <div>
                     <label
@@ -612,7 +593,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-
+          
                   <!-- Salary -->
                   <div>
                     <label
@@ -628,7 +609,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-
+          
                   <!-- Joined Date -->
                   <div>
                     <label
@@ -643,7 +624,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-
+          
                   <!-- Shift -->
                   <div>
                     <label
@@ -661,7 +642,7 @@
                       <option value="Evening">Evening (6PM - 12AM)</option>
                     </select>
                   </div>
-
+          
                   <!-- Password -->
                   <div>
                     <label
@@ -676,7 +657,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-
+          
                   <!-- Buttons -->
                   <div class="flex justify-between pt-2">
                     <button
@@ -696,47 +677,7 @@
                 </form>
               </div>
             </div>
-
-            <!-- Crop Modal -->
-            <div
-              id="crop-modal"
-              class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-md"
-            >
-              <div
-                class="bg-gray-800 w-11/12 max-w-2xl rounded-xl p-6 shadow-2xl"
-              >
-                <div class="flex justify-between items-center mb-4">
-                  <h2 class="text-xl font-semibold text-white">Crop Image</h2>
-                  <button
-                    id="close-crop-modal"
-                    class="text-gray-400 hover:text-white"
-                  >
-                    <i class="fas fa-times text-xl"></i>
-                  </button>
-                </div>
-                <div class="relative" style="height: 60vh">
-                  <img
-                    id="image-preview-crop"
-                    class="max-w-full max-h-full block mx-auto"
-                  />
-                </div>
-                <div class="flex justify-end gap-4 mt-4">
-                  <button
-                    id="cancel-crop-btn"
-                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    id="crop-image-btn"
-                    class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg"
-                  >
-                    Apply Crop
-                  </button>
-                </div>
-              </div>
-            </div>
-
+          
             <!-- View‑only modal -->
             <div
               id="view-trainer-modal"
@@ -760,7 +701,7 @@
                 </button>
               </div>
             </div>
-
+          
             <!-- Delete Confirmation Modal -->
             <div
               id="confirm-delete-modal"
@@ -792,7 +733,7 @@
                 </div>
               </div>
             </div>
-
+          
             <!-- Toast Notification Container -->
             <div
               id="trainers-toast-container"

@@ -24,13 +24,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const prevBtn = document.getElementById("trainers-prev-btn");
   const nextBtn = document.getElementById("trainers-next-btn");
   const toastContainer = document.getElementById("trainers-toast-container");
-  const trainerImageInput = document.getElementById("trainer-image");
-  const imagePreview = document.getElementById("image-preview");
-  const cropModal = document.getElementById("crop-modal");
-  const closeCropModal = document.getElementById("close-crop-modal");
-  const cancelCropBtn = document.getElementById("cancel-crop-btn");
-  const cropImageBtn = document.getElementById("crop-image-btn");
-  const imagePreviewCrop = document.getElementById("image-preview-crop");
   const trainersTableHead = document.getElementById("trainers-table-head");
   const trainersPaginationContainer = document.getElementById(
     "trainers-pagination-container"
@@ -45,10 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const itemsPerPage = 5;
   let isEditing = false;
   let currentEditId = null;
-  let cropper = null;
-  let currentImageFile = null;
   let trainerToDelete = null;
-  const IMGBB_API_KEY = "3e9be0852ae78b9238da6c41ae04b15e";
   const trainersRef = ref(database, "trainers");
 
   // Initialize
@@ -63,8 +53,6 @@ document.addEventListener("DOMContentLoaded", function () {
     closeViewTrainer.addEventListener("click", () =>
       viewTrainerModal.classList.add("hidden")
     );
-    closeCropModal.addEventListener("click", closeCropModalHandler);
-    cancelCropBtn.addEventListener("click", closeCropModalHandler);
 
     // Delete confirmation modal
     confirmDeleteBtn.addEventListener("click", confirmDelete);
@@ -96,10 +84,6 @@ document.addEventListener("DOMContentLoaded", function () {
         renderTrainersTable();
       }
     });
-
-    // Image handling
-    trainerImageInput.addEventListener("change", handleImageUpload);
-    cropImageBtn.addEventListener("click", applyCrop);
   }
 
   function loadTrainers() {
@@ -130,22 +114,10 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("trainer-joined").value = trainer.joinedDate;
         document.getElementById("trainer-shift").value = trainer.shift;
         document.getElementById("trainer-password").value = trainer.password;
-
-        if (trainer.imageUrl) {
-          imagePreview.src = trainer.imageUrl;
-          imagePreview.classList.remove("hidden");
-          currentImageFile = {
-            url: trainer.imageUrl,
-            deleteUrl: trainer.deleteUrl,
-          };
-        }
       }
     } else {
       trainerModalTitle.textContent = "Add Trainer";
       addTrainerForm.reset();
-      imagePreview.src = "";
-      imagePreview.classList.add("hidden");
-      currentImageFile = null;
     }
 
     addTrainerModal.classList.remove("hidden");
@@ -156,108 +128,6 @@ document.addEventListener("DOMContentLoaded", function () {
     isEditing = false;
     currentEditId = null;
     addTrainerForm.reset();
-    imagePreview.src = "";
-    imagePreview.classList.add("hidden");
-    currentImageFile = null;
-  }
-
-  function closeCropModalHandler() {
-    cropModal.classList.add("hidden");
-    if (cropper) {
-      cropper.destroy();
-      cropper = null;
-    }
-  }
-
-  function handleImageUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    currentImageFile = file;
-
-    if (!file.type.match("image.*")) {
-      showToast("Please select an image file", "error");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      imagePreviewCrop.src = event.target.result;
-      cropModal.classList.remove("hidden");
-
-      if (cropper) {
-        cropper.destroy();
-      }
-
-      imagePreviewCrop.onload = function () {
-        cropper = new Cropper(imagePreviewCrop, {
-          aspectRatio: 1,
-          viewMode: 1,
-          autoCropArea: 0.8,
-          responsive: true,
-          guides: false,
-        });
-      };
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function applyCrop() {
-    if (cropper) {
-      const canvas = cropper.getCroppedCanvas({
-        width: 400,
-        height: 400,
-        minWidth: 256,
-        minHeight: 256,
-        maxWidth: 800,
-        maxHeight: 800,
-        fillColor: "#fff",
-        imageSmoothingEnabled: true,
-        imageSmoothingQuality: "high",
-      });
-
-      if (canvas) {
-        canvas.toBlob(
-          async (blob) => {
-            try {
-              const formData = new FormData();
-              formData.append("image", blob, "trainer-image.jpg");
-
-              showToast("Uploading image...", "info");
-
-              const response = await fetch(
-                `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
-                {
-                  method: "POST",
-                  body: formData,
-                }
-              );
-
-              const data = await response.json();
-
-              if (data.success) {
-                imagePreview.src = data.data.url;
-                imagePreview.classList.remove("hidden");
-                currentImageFile = {
-                  url: data.data.url,
-                  deleteUrl: data.data.delete_url,
-                };
-                showToast("Image uploaded successfully", "success");
-              } else {
-                throw new Error(data.error.message || "Failed to upload image");
-              }
-            } catch (error) {
-              console.error("Error uploading image:", error);
-              showToast("Failed to upload image", "error");
-            } finally {
-              closeCropModalHandler();
-            }
-          },
-          "image/jpeg",
-          0.9
-        );
-      }
-    }
   }
 
   async function handleFormSubmit(e) {
@@ -273,8 +143,6 @@ document.addEventListener("DOMContentLoaded", function () {
       joinedDate: document.getElementById("trainer-joined").value,
       shift: document.getElementById("trainer-shift").value,
       password: document.getElementById("trainer-password").value,
-      imageUrl: currentImageFile?.url || "",
-      deleteUrl: currentImageFile?.deleteUrl || "",
       trainers_uid: "", // Will be set below
     };
 
@@ -309,25 +177,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!trainerToDelete) return;
 
     confirmDeleteModal.classList.add("hidden");
-    const trainer = trainers.find((t) => t.id === trainerToDelete);
-
-    if (!trainer) {
-      showToast("Trainer not found", "error");
-      return;
-    }
-
-    // Delete image from imgBB if exists
-    if (trainer.deleteUrl) {
-      try {
-        const success = await deleteImageFromImgBB(trainer.deleteUrl);
-        if (!success) {
-          showToast("Failed to delete trainer image", "error");
-        }
-      } catch (error) {
-        console.error("Error deleting image:", error);
-        showToast("Error deleting trainer image", "error");
-      }
-    }
 
     try {
       const trainerRef = ref(database, `trainers/${trainerToDelete}`);
@@ -339,32 +188,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     trainerToDelete = null;
-  }
-
-  async function deleteImageFromImgBB(deleteUrl) {
-    if (!deleteUrl) return false;
-
-    try {
-      const deleteHash = deleteUrl.split("/").pop();
-      if (!deleteHash) return false;
-
-      const deleteEndpoint = `https://api.imgbb.com/1/delete/${deleteHash}`;
-      const response = await fetch(deleteEndpoint, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          key: IMGBB_API_KEY,
-        }),
-      });
-
-      const data = await response.json();
-      return data.success;
-    } catch (error) {
-      console.error("Error deleting image:", error);
-      return false;
-    }
   }
 
   function getFilteredTrainers() {
@@ -404,13 +227,9 @@ document.addEventListener("DOMContentLoaded", function () {
         row.innerHTML = `
           <td class="px-3 py-3">
             <div class="flex items-center gap-3">
-              ${
-                trainer.imageUrl
-                  ? `<img src="${trainer.imageUrl}" alt="${trainer.name}" class="w-10 h-10 rounded-full object-cover">`
-                  : `<div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white">
-                  ${trainer.name.charAt(0).toUpperCase()}
-                </div>`
-              }
+              <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white">
+                ${trainer.name.charAt(0).toUpperCase()}
+              </div>
               <span>${trainer.name}</span>
             </div>
           </td>
@@ -469,13 +288,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     viewTrainerContent.innerHTML = `
       <div class="flex justify-center mb-4">
-        ${
-          trainer.imageUrl
-            ? `<img src="${trainer.imageUrl}" alt="${trainer.name}" class="w-32 h-32 rounded-full object-cover">`
-            : `<div class="w-32 h-32 rounded-full bg-indigo-500 flex items-center justify-center text-white text-4xl">
-            ${trainer.name.charAt(0).toUpperCase()}
-          </div>`
-        }
+        <div class="w-32 h-32 rounded-full bg-indigo-500 flex items-center justify-center text-white text-4xl">
+          ${trainer.name.charAt(0).toUpperCase()}
+        </div>
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>

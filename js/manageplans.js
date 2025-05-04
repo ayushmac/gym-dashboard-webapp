@@ -167,8 +167,8 @@ const render = (rows) => {
                  <button data-view="${uid}" class="text-indigo-400 hover:text-indigo-300">
                    <i class="fas fa-eye"></i>
                  </button>
-                 <button data-edit="${uid}" class="text-indigo-400 hover:text-indigo-300">
-                   <i class="fas fa-pen"></i>
+                 <button data-edit="${uid}" class=" text-blue-400 hover:text-blue-300">
+                     <i class="fas fa-edit"></i>
                  </button>
                  <button data-del="${uid}" class="text-red-500 hover:text-red-400">
                    <i class="fas fa-trash"></i>

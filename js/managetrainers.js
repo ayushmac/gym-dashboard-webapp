@@ -31,6 +31,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const confirmDeleteModal = document.getElementById("confirm-delete-modal");
   const confirmDeleteBtn = document.getElementById("confirm-delete-btn");
   const cancelDeleteBtn = document.getElementById("cancel-delete-btn");
+  const passwordInput = document.getElementById("trainer-password");
+  const togglePasswordBtn = document.getElementById("toggle-password");
 
   // State variables
   let trainers = [];
@@ -84,6 +86,15 @@ document.addEventListener("DOMContentLoaded", function () {
         renderTrainersTable();
       }
     });
+
+    // Password toggle
+    togglePasswordBtn.addEventListener("click", togglePasswordVisibility);
+  }
+
+  function togglePasswordVisibility() {
+    const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+    passwordInput.setAttribute("type", type);
+    togglePasswordBtn.innerHTML = type === "password" ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
   }
 
   function loadTrainers() {
@@ -128,6 +139,9 @@ document.addEventListener("DOMContentLoaded", function () {
     isEditing = false;
     currentEditId = null;
     addTrainerForm.reset();
+    // Reset password visibility
+    passwordInput.setAttribute("type", "password");
+    togglePasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
   }
 
   async function handleFormSubmit(e) {
@@ -286,6 +300,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const trainer = trainers.find((t) => t.id === trainerId);
     if (!trainer) return;
 
+    let passwordVisible = false;
+    
     viewTrainerContent.innerHTML = `
       <div class="flex justify-center mb-4">
         <div class="w-32 h-32 rounded-full bg-indigo-500 flex items-center justify-center text-white text-4xl">
@@ -311,7 +327,7 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
         <div>
           <p class="text-gray-400">Experience</p>
-          <p class="font-medium">${trainer.experience} years</p>
+          <p class="font-medium">${trainer.experience} year/s</p>
         </div>
         <div>
           <p class="text-gray-400">Salary</p>
@@ -327,8 +343,25 @@ document.addEventListener("DOMContentLoaded", function () {
           <p class="text-gray-400">Shift</p>
           <p class="font-medium">${trainer.shift}</p>
         </div>
+        <div>
+          <p class="text-gray-400">Password</p>
+          <div class="flex items-center gap-2">
+            <p class="font-medium" id="view-password">${'•'.repeat(trainer.password.length)}</p>
+            <button id="toggle-view-password" class="text-gray-400 hover:text-white">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
       </div>
     `;
+
+    // Add event listener for the password toggle in the view modal
+    document.getElementById("toggle-view-password").addEventListener("click", function() {
+      passwordVisible = !passwordVisible;
+      const passwordElement = document.getElementById("view-password");
+      passwordElement.textContent = passwordVisible ? trainer.password : '•'.repeat(trainer.password.length);
+      this.innerHTML = passwordVisible ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+    });
 
     viewTrainerModal.classList.remove("hidden");
   }

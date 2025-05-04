@@ -1,27 +1,45 @@
 // Import necessary functions from your firebaseConfig file
-import { database, ref, onValue } from './firebase-config.js';  // Adjust the path if necessary
+import { database, ref, onValue } from './firebase-config.js';
 
-// Reference to Firebase Realtime Database for 'membership_plans'
+// References to Firebase Realtime Database nodes
 const plansRef = ref(database, 'membership_plans');
+const trainersRef = ref(database, 'trainers');
 
-// Function to get the total number of plans and update the UI
-function updateStats(plansData) {
-    let totalPlans = Object.keys(plansData).length;
-
-    // Update the DOM with the total number of plans
+// Function to update the statistics in the UI
+function updateStats(plansData, trainersData) {
+    // Update total plans count
+    const totalPlans = plansData ? Object.keys(plansData).length : 0;
     document.getElementById('stat-total-plans').textContent = totalPlans;
+
+    // Update total trainers count
+    const totalTrainers = trainersData ? Object.keys(trainersData).length : 0;
+    document.getElementById('stat-total-trainers').textContent = totalTrainers;
 }
 
-// Listen for changes to the 'membership_plans' node in real-time
+// Listen for changes to the 'membership_plans' node
 onValue(plansRef, (snapshot) => {
-    if (snapshot.exists()) {
-        const plansData = snapshot.val();
-        updateStats(plansData);
-    } else {
-        // If no data exists, display 0
-        document.getElementById('stat-total-plans').textContent = "0";
-    }
+    const plansData = snapshot.exists() ? snapshot.val() : null;
+    
+    // Get current trainers data to maintain it when updating
+    const trainersSnapshot = document.getElementById('stat-total-trainers').textContent;
+    const trainersData = trainersSnapshot !== '‑‑' ? { count: trainersSnapshot } : null;
+    
+    updateStats(plansData, trainersData);
 }, (error) => {
-    console.error("Error getting data: ", error);
-    // Optionally handle errors here, e.g., show an error message in the UI
+    console.error("Error getting plans data: ", error);
+    document.getElementById('stat-total-plans').textContent = "0";
+});
+
+// Listen for changes to the 'trainers' node
+onValue(trainersRef, (snapshot) => {
+    const trainersData = snapshot.exists() ? snapshot.val() : null;
+    
+    // Get current plans data to maintain it when updating
+    const plansSnapshot = document.getElementById('stat-total-plans').textContent;
+    const plansData = plansSnapshot !== '‑‑' ? { count: plansSnapshot } : null;
+    
+    updateStats(plansData, trainersData);
+}, (error) => {
+    console.error("Error getting trainers data: ", error);
+    document.getElementById('stat-total-trainers').textContent = "0";
 });

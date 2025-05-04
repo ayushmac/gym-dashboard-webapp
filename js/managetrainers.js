@@ -247,7 +247,7 @@ document.addEventListener("DOMContentLoaded", function () {
               <span>${trainer.name}</span>
             </div>
           </td>
-          <td class="px-3 py-3">${trainer.experience} years</td>
+          <td class="px-3 py-3">${trainer.experience} year/s</td>
           <td class="px-3 py-3">${trainer.mobile}</td>
           <td class="px-3 py-3">${trainer.shift}</td>
           <td class="px-3 py-3">

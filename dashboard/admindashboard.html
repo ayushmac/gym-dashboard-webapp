@@ -163,7 +163,7 @@
                   </div>
                   <i class="fas fa-list text-4xl text-blue-400"></i>
                 </div>
-          
+
                 <!-- Total Trainers Card -->
                 <div
                   class="bg-gray-700 p-6 rounded-lg flex items-center justify-between shadow-xl hover:shadow-2xl transition-shadow duration-300"
@@ -434,7 +434,7 @@
           <!-- trainers section -->
           <section id="trainers" class="tab-content hidden">
             <h1 class="text-2xl font-bold text-white mb-6">Manage Trainers</h1>
-          
+
             <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
               <!-- Search + Add -->
               <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
@@ -460,7 +460,7 @@
                   <i class="fas fa-plus"></i> Add Trainer
                 </button>
               </div>
-          
+
               <!-- Trainers table -->
               <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left text-gray-200">
@@ -489,7 +489,7 @@
                   </p>
                 </div>
               </div>
-          
+
               <!-- Pagination -->
               <div
                 id="trainers-pagination-container"
@@ -510,7 +510,7 @@
                 </button>
               </div>
             </div>
-          
+
             <!-- Add / Edit modal -->
             <div
               id="add-trainer-modal"
@@ -525,7 +525,7 @@
                 >
                   Add Trainer
                 </h2>
-          
+
                 <form id="add-trainer-form" class="space-y-4">
                   <!-- Name -->
                   <div>
@@ -540,7 +540,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-          
+
                   <!-- Email -->
                   <div>
                     <label
@@ -555,7 +555,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-          
+
                   <!-- Mobile -->
                   <div>
                     <label
@@ -570,7 +570,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-          
+
                   <!-- Age -->
                   <div>
                     <label
@@ -587,7 +587,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-          
+
                   <!-- Experience -->
                   <div>
                     <label
@@ -604,7 +604,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-          
+
                   <!-- Salary -->
                   <div>
                     <label
@@ -620,7 +620,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-          
+
                   <!-- Joined Date -->
                   <div>
                     <label
@@ -635,7 +635,7 @@
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
-          
+
                   <!-- Shift -->
                   <div>
                     <label
@@ -653,7 +653,7 @@
                       <option value="Evening">Evening (6PM - 12AM)</option>
                     </select>
                   </div>
-          
+
                   <!-- Password -->
                   <div>
                     <label
@@ -677,7 +677,7 @@
                       </button>
                     </div>
                   </div>
-          
+
                   <!-- Buttons -->
                   <div class="flex justify-between pt-2">
                     <button
@@ -697,7 +697,7 @@
                 </form>
               </div>
             </div>
-          
+
             <!-- View‑only modal -->
             <div
               id="view-trainer-modal"
@@ -721,7 +721,7 @@
                 </button>
               </div>
             </div>
-          
+
             <!-- Delete Confirmation Modal -->
             <div
               id="confirm-delete-modal"
@@ -753,7 +753,7 @@
                 </div>
               </div>
             </div>
-          
+
             <!-- Toast Notification Container -->
             <div
               id="trainers-toast-container"
@@ -778,9 +778,428 @@
 
           <section id="members" class="tab-content hidden">
             <h1 class="text-2xl font-bold text-white mb-6">Manage Members</h1>
+
             <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
-              <p>Manage all gym members here.</p>
+              <!-- Search + Add + Filter -->
+              <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+                <div class="relative flex-1">
+                  <div class="relative">
+                    <input
+                      id="members-search-input"
+                      type="text"
+                      placeholder="Search by name, phone or email..."
+                      class="w-full p-2 pl-10 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                    />
+                    <span
+                      class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    >
+                      <i class="fas fa-search"></i>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="flex gap-2">
+                  <select
+                    id="members-status-filter"
+                    class="p-2 rounded-lg bg-gray-700 text-white"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="expired">Expired</option>
+                  </select>
+
+                  <button
+                    id="members-add-btn"
+                    class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap text-center"
+                  >
+                    <i class="fas fa-plus"></i> Add Member
+                  </button>
+                </div>
+              </div>
+
+              <!-- Members table -->
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-200">
+                  <thead
+                    id="members-table-head"
+                    class="uppercase text-xs bg-gray-700"
+                  >
+                    <tr>
+                      <th class="px-3 py-2">Name</th>
+                      <th class="px-3 py-2">Mobile</th>
+                      <th class="px-3 py-2">Status</th>
+                      <th class="px-3 py-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="members-table-body"></tbody>
+                </table>
+
+                <!-- Empty state messages -->
+                <div
+                  id="members-empty-msg"
+                  class="hidden text-center py-8 text-gray-400"
+                >
+                  <i class="fas fa-inbox text-4xl mb-2"></i>
+                  <p class="text-lg">No members available</p>
+                  <p class="text-sm mt-1">
+                    Click "Add Member" to add your first member
+                  </p>
+                </div>
+
+                <div
+                  id="members-empty-active"
+                  class="hidden text-center py-8 text-gray-400"
+                >
+                  <i
+                    class="fas fa-check-circle text-4xl mb-2 text-green-400"
+                  ></i>
+                  <p class="text-lg">No active members found</p>
+                  <p class="text-sm mt-1">
+                    All members are either inactive or expired
+                  </p>
+                </div>
+
+                <div
+                  id="members-empty-inactive"
+                  class="hidden text-center py-8 text-gray-400"
+                >
+                  <i class="fas fa-clock text-4xl mb-2 text-yellow-400"></i>
+                  <p class="text-lg">No inactive members found</p>
+                  <p class="text-sm mt-1">
+                    All members are either active or expired
+                  </p>
+                </div>
+
+                <div
+                  id="members-empty-expired"
+                  class="hidden text-center py-8 text-gray-400"
+                >
+                  <i
+                    class="fas fa-exclamation-triangle text-4xl mb-2 text-red-400"
+                  ></i>
+                  <p class="text-lg">No expired members found</p>
+                  <p class="text-sm mt-1">
+                    All members are either active or inactive
+                  </p>
+                </div>
+              </div>
+
+              <!-- Pagination -->
+              <div id="members-pagination" class="flex justify-between mt-4">
+                <button
+                  id="members-prev-page"
+                  class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg disabled:opacity-40"
+                  disabled
+                >
+                  Prev
+                </button>
+                <button
+                  id="members-next-page"
+                  class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
             </div>
+
+            <!-- Add / Edit modal -->
+            <div
+              id="members-modal"
+              class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-md overflow-y-auto"
+            >
+              <div
+                class="bg-gray-800 w-11/12 max-w-md rounded-xl p-6 shadow-2xl my-8 max-h-[90vh] overflow-y-auto"
+              >
+                <h2
+                  id="members-modal-title"
+                  class="text-xl font-semibold text-white mb-4"
+                >
+                  Add Member
+                </h2>
+
+                <form id="members-form" class="space-y-4">
+                  <!-- Name -->
+                  <div>
+                    <label
+                      for="members-name-input"
+                      class="block mb-1 text-sm text-gray-300"
+                      >Name</label
+                    >
+                    <input
+                      id="members-name-input"
+                      required
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                    />
+                  </div>
+
+                  <!-- DOB -->
+                  <div>
+                    <label
+                      for="members-dob-input"
+                      class="block mb-1 text-sm text-gray-300"
+                      >Date of Birth</label
+                    >
+                    <input
+                      id="members-dob-input"
+                      type="date"
+                      required
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                    />
+                  </div>
+
+                  <!-- Email -->
+                  <div>
+                    <label
+                      for="members-email-input"
+                      class="block mb-1 text-sm text-gray-300"
+                      >Email</label
+                    >
+                    <input
+                      id="members-email-input"
+                      type="email"
+                      required
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                    />
+                  </div>
+
+                  <!-- Contact -->
+                  <div>
+                    <label
+                      for="members-contact-input"
+                      class="block mb-1 text-sm text-gray-300"
+                      >Contact Number</label
+                    >
+                    <input
+                      id="members-contact-input"
+                      type="tel"
+                      required
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                    />
+                  </div>
+
+                  <!-- Guardian -->
+                  <div>
+                    <label
+                      for="members-guardian-input"
+                      class="block mb-1 text-sm text-gray-300"
+                      >Guardian Name</label
+                    >
+                    <input
+                      id="members-guardian-input"
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                    />
+                  </div>
+
+                  <!-- Emergency Contact -->
+                  <div>
+                    <label
+                      for="members-emergency-input"
+                      class="block mb-1 text-sm text-gray-300"
+                      >Emergency Contact</label
+                    >
+                    <input
+                      id="members-emergency-input"
+                      type="tel"
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                    />
+                  </div>
+
+                  <!-- Medical Conditions -->
+                  <div>
+                    <label
+                      for="members-medical-input"
+                      class="block mb-1 text-sm text-gray-300"
+                      >Medical Conditions</label
+                    >
+                    <textarea
+                      id="members-medical-input"
+                      rows="3"
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                    ></textarea>
+                  </div>
+
+                  <!-- Membership Status -->
+                  <div>
+                    <label
+                      for="members-status-select"
+                      class="block mb-1 text-sm text-gray-300"
+                      >Membership Status</label
+                    >
+                    <select
+                      id="members-status-select"
+                      required
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white"
+                    >
+                      <option value="inactive">Inactive</option>
+                      <option value="active">Active</option>
+                      <option value="expired">Expired</option>
+                    </select>
+                  </div>
+
+                  <!-- Plan Dates -->
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        for="members-plan-start-input"
+                        class="block mb-1 text-sm text-gray-300"
+                        >Plan Start Date</label
+                      >
+                      <input
+                        id="members-plan-start-input"
+                        type="date"
+                        class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        for="members-plan-end-input"
+                        class="block mb-1 text-sm text-gray-300"
+                        >Plan End Date</label
+                      >
+                      <input
+                        id="members-plan-end-input"
+                        type="date"
+                        class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Training Dates -->
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        for="members-training-start-input"
+                        class="block mb-1 text-sm text-gray-300"
+                        >Training Start Date</label
+                      >
+                      <input
+                        id="members-training-start-input"
+                        type="date"
+                        class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        for="members-training-end-input"
+                        class="block mb-1 text-sm text-gray-300"
+                        >Training End Date</label
+                      >
+                      <input
+                        id="members-training-end-input"
+                        type="date"
+                        class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Password -->
+                  <div>
+                    <label
+                      for="members-password-input"
+                      class="block mb-1 text-sm text-gray-300"
+                      >Password</label
+                    >
+                    <div class="relative">
+                      <input
+                        id="members-password-input"
+                        type="password"
+                        required
+                        class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                      />
+                      <button
+                        type="button"
+                        id="members-toggle-password"
+                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                      >
+                        <i class="fas fa-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Buttons -->
+                  <div class="flex justify-between pt-2">
+                    <button
+                      type="submit"
+                      class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      id="members-close-modal"
+                      class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Improved View Modal -->
+            <div
+              id="members-view-modal"
+              class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-md overflow-y-auto"
+            >
+              <div
+                class="bg-gray-800 w-11/12 max-w-2xl rounded-xl p-6 shadow-2xl my-8 max-h-[90vh] overflow-y-auto"
+              >
+                <div class="flex justify-between items-center mb-4">
+                  <h2 class="text-xl font-semibold text-white">
+                    Member details
+                  </h2>
+                  <button
+                    id="members-close-view"
+                    class="text-gray-400 hover:text-white"
+                  >
+                    <i class="fas fa-times text-xl"></i>
+                  </button>
+                </div>
+                <div
+                  id="members-view-content"
+                  class="text-gray-200 text-sm grid grid-cols-1 md:grid-cols-2 gap-4"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Delete Confirmation Modal -->
+            <div
+              id="members-confirm-delete"
+              class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-md"
+            >
+              <div
+                class="bg-gray-800 rounded-xl p-6 shadow-2xl w-11/12 max-w-md"
+              >
+                <h2 class="text-xl font-semibold text-white mb-4">
+                  Confirm Delete
+                </h2>
+                <p class="text-gray-300 mb-6">
+                  Are you sure you want to delete this member? This action
+                  cannot be undone.
+                </p>
+                <div class="flex justify-end gap-4">
+                  <button
+                    id="members-cancel-delete"
+                    class="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 text-white"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    id="members-confirm-delete-btn"
+                    class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Toast Notification Container -->
+            <div
+              id="members-toast-container"
+              class="fixed top-5 right-5 z-50 space-y-3"
+            ></div>
           </section>
 
           <section id="payments" class="tab-content hidden">
@@ -847,6 +1266,7 @@
     <script src="../js/logout.js"></script>
     <script type="module" src="../js/manageplans.js"></script>
     <script type="module" src="../js/managetrainers.js"></script>
+    <script type="module" src="../js/managemembers.js"></script>
     <script type="module" src="../js/stats.js"></script>
   </body>
 </html>

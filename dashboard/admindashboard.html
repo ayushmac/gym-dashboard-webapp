@@ -883,7 +883,7 @@
             <h1 class="text-2xl font-bold text-white mb-6">Manage Staff</h1>
 
             <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
-              <!-- Search + Add + Filter -->
+              <!-- Search + Add -->
               <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
                 <div class="relative flex-1">
                   <div class="relative">
@@ -900,7 +900,6 @@
                     </span>
                   </div>
                 </div>
-
                 <button
                   id="staff-add-btn"
                   class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap text-center"
@@ -926,8 +925,6 @@
                   </thead>
                   <tbody id="staff-table-body"></tbody>
                 </table>
-
-                <!-- Empty state messages -->
                 <div
                   id="staff-empty-msg"
                   class="hidden text-center py-8 text-gray-400"
@@ -961,7 +958,7 @@
               </div>
             </div>
 
-            <!-- Add / Edit modal -->
+            <!-- Add/Edit Modal -->
             <div
               id="staff-modal"
               class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-md overflow-y-auto"
@@ -980,12 +977,12 @@
                   <!-- Name -->
                   <div>
                     <label
-                      for="staff-name-input"
+                      for="staff-name"
                       class="block mb-1 text-sm text-gray-300"
                       >Full Name <span class="text-red-500">*</span></label
                     >
                     <input
-                      id="staff-name-input"
+                      id="staff-name"
                       required
                       pattern="[A-Za-z ]+"
                       title="Only alphabets and spaces allowed"
@@ -995,7 +992,7 @@
                       class="text-red-500 text-xs mt-1 hidden"
                       id="staff-name-error"
                     >
-                      Please enter a valid name (only letters and spaces)
+                      Please enter a valid name
                     </p>
                   </div>
 
@@ -1042,12 +1039,12 @@
                   <!-- Date of Birth -->
                   <div>
                     <label
-                      for="staff-dob-input"
+                      for="staff-dob"
                       class="block mb-1 text-sm text-gray-300"
                       >Date of Birth <span class="text-red-500">*</span></label
                     >
                     <input
-                      id="staff-dob-input"
+                      id="staff-dob"
                       type="date"
                       required
                       max="${new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}"
@@ -1061,20 +1058,19 @@
                     </p>
                   </div>
 
-                  <!-- Phone Number -->
+                  <!-- Phone -->
                   <div>
                     <label
-                      for="staff-phone-input"
+                      for="staff-phone"
                       class="block mb-1 text-sm text-gray-300"
-                      >Phone Number <span class="text-red-500">*</span></label
+                      >Phone <span class="text-red-500">*</span></label
                     >
                     <input
-                      id="staff-phone-input"
+                      id="staff-phone"
                       type="tel"
-                      pattern="[0-9]{10}"
-                      title="10 digit phone number"
                       required
                       maxlength="10"
+                      pattern="[0-9]{10}"
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                     <p
@@ -1085,84 +1081,15 @@
                     </p>
                   </div>
 
-                  <!-- Guardian Name -->
-                  <div>
-                    <label
-                      for="staff-guardian-input"
-                      class="block mb-1 text-sm text-gray-300"
-                      >Guardian Name <span class="text-red-500">*</span></label
-                    >
-                    <input
-                      id="staff-guardian-input"
-                      required
-                      pattern="[A-Za-z ]+"
-                      title="Only alphabets and spaces allowed"
-                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-                    />
-                    <p
-                      class="text-red-500 text-xs mt-1 hidden"
-                      id="staff-guardian-error"
-                    >
-                      Please enter a valid name (only letters and spaces)
-                    </p>
-                  </div>
-
-                  <!-- Emergency Contact -->
-                  <div>
-                    <label
-                      for="staff-emergency-input"
-                      class="block mb-1 text-sm text-gray-300"
-                      >Emergency Contact
-                      <span class="text-red-500">*</span></label
-                    >
-                    <input
-                      id="staff-emergency-input"
-                      type="tel"
-                      pattern="[0-9]{10}"
-                      title="10 digit phone number"
-                      required
-                      maxlength="10"
-                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-                    />
-                    <p
-                      class="text-red-500 text-xs mt-1 hidden"
-                      id="staff-emergency-error"
-                    >
-                      Please enter a valid 10-digit phone number
-                    </p>
-                  </div>
-
-                  <!-- Medical Conditions -->
-                  <div>
-                    <label
-                      for="staff-medical-input"
-                      class="block mb-1 text-sm text-gray-300"
-                      >Medical Conditions
-                      <span class="text-red-500">*</span></label
-                    >
-                    <textarea
-                      id="staff-medical-input"
-                      rows="3"
-                      required
-                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-                    ></textarea>
-                    <p
-                      class="text-red-500 text-xs mt-1 hidden"
-                      id="staff-medical-error"
-                    >
-                      Please enter medical conditions (or 'None' if none)
-                    </p>
-                  </div>
-
                   <!-- Email -->
                   <div>
                     <label
-                      for="staff-email-input"
+                      for="staff-email"
                       class="block mb-1 text-sm text-gray-300"
                       >Email</label
                     >
                     <input
-                      id="staff-email-input"
+                      id="staff-email"
                       type="email"
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
@@ -1170,20 +1097,20 @@
                       class="text-red-500 text-xs mt-1 hidden"
                       id="staff-email-error"
                     >
-                      Please enter a valid email address
+                      Please enter a valid email
                     </p>
                   </div>
 
                   <!-- Address -->
                   <div>
                     <label
-                      for="staff-address-input"
+                      for="staff-address"
                       class="block mb-1 text-sm text-gray-300"
                       >Address <span class="text-red-500">*</span></label
                     >
                     <textarea
-                      id="staff-address-input"
-                      rows="2"
+                      id="staff-address"
+                      rows="3"
                       required
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     ></textarea>
@@ -1198,12 +1125,12 @@
                   <!-- Shift -->
                   <div>
                     <label
-                      for="staff-shift-select"
+                      for="staff-shift"
                       class="block mb-1 text-sm text-gray-300"
                       >Shift <span class="text-red-500">*</span></label
                     >
                     <select
-                      id="staff-shift-select"
+                      id="staff-shift"
                       required
                       class="w-full p-2 rounded-lg bg-gray-700 text-white"
                     >
@@ -1213,36 +1140,36 @@
                     </select>
                   </div>
 
-                  <!-- Joined Date -->
+                  <!-- Role -->
                   <div>
                     <label
-                      for="staff-joined-input"
+                      for="staff-role"
                       class="block mb-1 text-sm text-gray-300"
-                      >Joined Date <span class="text-red-500">*</span></label
+                      >Role <span class="text-red-500">*</span></label
                     >
                     <input
-                      id="staff-joined-input"
-                      type="date"
+                      id="staff-role"
                       required
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                      placeholder="Enter role"
                     />
                     <p
                       class="text-red-500 text-xs mt-1 hidden"
-                      id="staff-joined-error"
+                      id="staff-role-error"
                     >
-                      Please select a valid joined date
+                      Please enter a valid role
                     </p>
                   </div>
 
                   <!-- Salary -->
                   <div>
                     <label
-                      for="staff-salary-input"
+                      for="staff-salary"
                       class="block mb-1 text-sm text-gray-300"
-                      >Salary <span class="text-red-500">*</span></label
+                      >Salary (₹) <span class="text-red-500">*</span></label
                     >
                     <input
-                      id="staff-salary-input"
+                      id="staff-salary"
                       type="number"
                       required
                       min="0"
@@ -1252,28 +1179,28 @@
                       class="text-red-500 text-xs mt-1 hidden"
                       id="staff-salary-error"
                     >
-                      Please enter a valid salary amount
+                      Please enter a valid salary
                     </p>
                   </div>
 
-                  <!-- Role -->
+                  <!-- Joined Date -->
                   <div>
                     <label
-                      for="staff-role-input"
+                      for="staff-joined"
                       class="block mb-1 text-sm text-gray-300"
-                      >Role <span class="text-red-500">*</span></label
+                      >Joined Date <span class="text-red-500">*</span></label
                     >
                     <input
-                      id="staff-role-input"
+                      id="staff-joined"
+                      type="date"
                       required
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-                      placeholder="Enter custom role"
                     />
                     <p
                       class="text-red-500 text-xs mt-1 hidden"
-                      id="staff-role-error"
+                      id="staff-joined-error"
                     >
-                      Please enter a valid role
+                      Please select a valid date
                     </p>
                   </div>
 
@@ -1303,7 +1230,7 @@
               class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-md overflow-y-auto"
             >
               <div
-                class="bg-gray-800 w-11/12 max-w-2xl rounded-xl p-6 shadow-2xl my-8 max-h-[90vh] overflow-y-auto"
+                class="bg-gray-800 w-11/12 max-w-md rounded-xl p-6 shadow-2xl my-8 max-h-[90vh] overflow-y-auto"
               >
                 <div class="flex justify-between items-center mb-4">
                   <h2 class="text-xl font-semibold text-white">
@@ -1318,7 +1245,7 @@
                 </div>
                 <div
                   id="staff-view-content"
-                  class="text-gray-200 text-sm grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto"
+                  class="text-gray-200 text-sm space-y-4"
                 ></div>
               </div>
             </div>
@@ -1355,7 +1282,7 @@
               </div>
             </div>
 
-            <!-- Toast Notification Container -->
+            <!-- Toast Notifications -->
             <div
               id="staff-toast-container"
               class="fixed top-5 right-5 z-50 space-y-3"

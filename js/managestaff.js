@@ -21,16 +21,22 @@ document.addEventListener("DOMContentLoaded", function () {
   const staffViewModal = document.getElementById("staff-view-modal");
   const staffCloseView = document.getElementById("staff-close-view");
   const staffViewContent = document.getElementById("staff-view-content");
-  const staffPrevBtn = document.getElementById("staff-prev-page");
-  const staffNextBtn = document.getElementById("staff-next-page");
+  const staffPrevBtn = document.getElementById("staff-prev-btn");
+  const staffNextBtn = document.getElementById("staff-next-btn");
   const staffToastContainer = document.getElementById("staff-toast-container");
   const staffTableHead = document.getElementById("staff-table-head");
-  const staffPagination = document.getElementById("staff-pagination");
-  const staffConfirmDelete = document.getElementById("staff-confirm-delete");
+  const staffPaginationContainer = document.getElementById(
+    "staff-pagination-container"
+  );
+  const staffConfirmDeleteModal = document.getElementById(
+    "staff-confirm-delete-modal"
+  );
   const staffConfirmDeleteBtn = document.getElementById(
     "staff-confirm-delete-btn"
   );
-  const staffCancelDelete = document.getElementById("staff-cancel-delete");
+  const staffCancelDeleteBtn = document.getElementById(
+    "staff-cancel-delete-btn"
+  );
 
   // State variables
   let staff = [];
@@ -54,16 +60,16 @@ document.addEventListener("DOMContentLoaded", function () {
       staffViewModal.classList.add("hidden")
     );
 
-    // Delete confirmation modal
+    // Delete confirmation
     staffConfirmDeleteBtn.addEventListener("click", confirmDelete);
-    staffCancelDelete.addEventListener("click", () =>
-      staffConfirmDelete.classList.add("hidden")
+    staffCancelDeleteBtn.addEventListener("click", () =>
+      staffConfirmDeleteModal.classList.add("hidden")
     );
 
     // Form submission
     staffForm.addEventListener("submit", handleFormSubmit);
 
-    // Search functionality
+    // Search
     staffSearchInput.addEventListener("input", () => {
       currentPage = 1;
       renderStaffTable();
@@ -85,247 +91,136 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    // Add input validation listeners
+    // Validation listeners
     document
-      .getElementById("staff-name-input")
+      .getElementById("staff-name")
       .addEventListener("input", validateName);
     document
-      .getElementById("staff-phone-input")
-      .addEventListener("input", validatePhone);
-    document
-      .getElementById("staff-guardian-input")
-      .addEventListener("input", validateGuardian);
-    document
-      .getElementById("staff-emergency-input")
-      .addEventListener("input", validateEmergency);
-    document
-      .getElementById("staff-medical-input")
-      .addEventListener("input", validateMedical);
-    document
-      .getElementById("staff-email-input")
-      .addEventListener("blur", validateEmail);
-    document
-      .getElementById("staff-address-input")
-      .addEventListener("input", validateAddress);
-    document
-      .getElementById("staff-salary-input")
-      .addEventListener("input", validateSalary);
-    document
-      .getElementById("staff-role-input")
-      .addEventListener("input", validateRole);
-    document
-      .getElementById("staff-dob-input")
+      .getElementById("staff-dob")
       .addEventListener("change", validateDOB);
     document
-      .getElementById("staff-joined-input")
+      .getElementById("staff-phone")
+      .addEventListener("input", validatePhone);
+    document
+      .getElementById("staff-email")
+      .addEventListener("blur", validateEmail);
+    document
+      .getElementById("staff-address")
+      .addEventListener("input", validateAddress);
+    document
+      .getElementById("staff-role")
+      .addEventListener("input", validateRole);
+    document
+      .getElementById("staff-salary")
+      .addEventListener("input", validateSalary);
+    document
+      .getElementById("staff-joined")
       .addEventListener("change", validateJoinedDate);
   }
 
-  // Calculate age from DOB and validate (must be >=18)
-  function validateDOB() {
-    const input = document.getElementById("staff-dob-input");
-    const error = document.getElementById("dob-error");
-    const dob = new Date(input.value);
+  function calculateAge(dob) {
+    const birthDate = new Date(dob);
     const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const monthDiff = today.getMonth() - dob.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
-
-    const isValid = input.value.trim().length > 0 && age >= 18;
-
-    if (!isValid) {
-      error.textContent =
-        age < 18
-          ? "Staff must be at least 18 years old"
-          : "Please select a valid date of birth";
-      error.classList.remove("hidden");
-      input.classList.add("border-red-500");
-    } else {
-      error.classList.add("hidden");
-      input.classList.remove("border-red-500");
-    }
-    return isValid;
+    return age;
   }
 
   // Validation functions
   function validateName() {
-    const input = document.getElementById("staff-name-input");
-    const error = document.getElementById("name-error");
+    const input = document.getElementById("staff-name");
+    const error = document.getElementById("staff-name-error");
     const isValid =
       input.value.trim().length > 0 && /^[A-Za-z ]+$/.test(input.value.trim());
+    toggleError(input, error, isValid);
+    return isValid;
+  }
 
-    if (!isValid) {
-      error.classList.remove("hidden");
-      input.classList.add("border-red-500");
-    } else {
-      error.classList.add("hidden");
-      input.classList.remove("border-red-500");
-    }
+  function validateDOB() {
+    const input = document.getElementById("staff-dob");
+    const error = document.getElementById("staff-dob-error");
+    const isValid = input.value && calculateAge(input.value) >= 18;
+    toggleError(input, error, isValid, "Staff must be at least 18 years old");
     return isValid;
   }
 
   function validatePhone() {
-    const input = document.getElementById("staff-phone-input");
-    const error = document.getElementById("phone-error");
+    const input = document.getElementById("staff-phone");
+    const error = document.getElementById("staff-phone-error");
     const isValid = /^[0-9]{10}$/.test(input.value.trim());
-
-    if (!isValid) {
-      error.classList.remove("hidden");
-      input.classList.add("border-red-500");
-    } else {
-      error.classList.add("hidden");
-      input.classList.remove("border-red-500");
-    }
-    return isValid;
-  }
-
-  function validateGuardian() {
-    const input = document.getElementById("staff-guardian-input");
-    const error = document.getElementById("guardian-error");
-    const isValid =
-      input.value.trim().length > 0 && /^[A-Za-z ]+$/.test(input.value.trim());
-
-    if (!isValid) {
-      error.classList.remove("hidden");
-      input.classList.add("border-red-500");
-    } else {
-      error.classList.add("hidden");
-      input.classList.remove("border-red-500");
-    }
-    return isValid;
-  }
-
-  function validateEmergency() {
-    const input = document.getElementById("staff-emergency-input");
-    const error = document.getElementById("emergency-error");
-    const isValid = /^[0-9]{10}$/.test(input.value.trim());
-
-    if (!isValid) {
-      error.classList.remove("hidden");
-      input.classList.add("border-red-500");
-    } else {
-      error.classList.add("hidden");
-      input.classList.remove("border-red-500");
-    }
-    return isValid;
-  }
-
-  function validateMedical() {
-    const input = document.getElementById("staff-medical-input");
-    const error = document.getElementById("medical-error");
-    const isValid = input.value.trim().length > 0;
-
-    if (!isValid) {
-      error.classList.remove("hidden");
-      input.classList.add("border-red-500");
-    } else {
-      error.classList.add("hidden");
-      input.classList.remove("border-red-500");
-    }
+    toggleError(input, error, isValid);
     return isValid;
   }
 
   function validateEmail() {
-    const input = document.getElementById("staff-email-input");
-    const error = document.getElementById("email-error");
+    const input = document.getElementById("staff-email");
+    const error = document.getElementById("staff-email-error");
     const value = input.value.trim();
     const isValid = value === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-
-    if (!isValid) {
-      error.classList.remove("hidden");
-      input.classList.add("border-red-500");
-    } else {
-      error.classList.add("hidden");
-      input.classList.remove("border-red-500");
-    }
+    toggleError(input, error, isValid);
     return isValid;
   }
 
   function validateAddress() {
-    const input = document.getElementById("staff-address-input");
-    const error = document.getElementById("address-error");
+    const input = document.getElementById("staff-address");
+    const error = document.getElementById("staff-address-error");
     const isValid = input.value.trim().length > 0;
-
-    if (!isValid) {
-      error.classList.remove("hidden");
-      input.classList.add("border-red-500");
-    } else {
-      error.classList.add("hidden");
-      input.classList.remove("border-red-500");
-    }
-    return isValid;
-  }
-
-  function validateSalary() {
-    const input = document.getElementById("staff-salary-input");
-    const error = document.getElementById("salary-error");
-    const isValid =
-      input.value.trim().length > 0 && parseFloat(input.value) >= 0;
-
-    if (!isValid) {
-      error.classList.remove("hidden");
-      input.classList.add("border-red-500");
-    } else {
-      error.classList.add("hidden");
-      input.classList.remove("border-red-500");
-    }
+    toggleError(input, error, isValid);
     return isValid;
   }
 
   function validateRole() {
-    const input = document.getElementById("staff-role-input");
-    const error = document.getElementById("role-error");
+    const input = document.getElementById("staff-role");
+    const error = document.getElementById("staff-role-error");
     const isValid = input.value.trim().length > 0;
+    toggleError(input, error, isValid);
+    return isValid;
+  }
 
-    if (!isValid) {
-      error.classList.remove("hidden");
-      input.classList.add("border-red-500");
-    } else {
-      error.classList.add("hidden");
-      input.classList.remove("border-red-500");
-    }
+  function validateSalary() {
+    const input = document.getElementById("staff-salary");
+    const error = document.getElementById("staff-salary-error");
+    const isValid =
+      input.value.trim().length > 0 && parseFloat(input.value) >= 0;
+    toggleError(input, error, isValid);
     return isValid;
   }
 
   function validateJoinedDate() {
-    const input = document.getElementById("staff-joined-input");
-    const error = document.getElementById("joined-error");
+    const input = document.getElementById("staff-joined");
+    const error = document.getElementById("staff-joined-error");
     const isValid = input.value.trim().length > 0;
+    toggleError(input, error, isValid);
+    return isValid;
+  }
 
+  function toggleError(input, error, isValid, message = "") {
     if (!isValid) {
+      error.textContent = message || error.textContent;
       error.classList.remove("hidden");
       input.classList.add("border-red-500");
     } else {
       error.classList.add("hidden");
       input.classList.remove("border-red-500");
     }
-    return isValid;
   }
 
   function validateForm() {
     let isValid = true;
-
-    // Validate all required fields
     if (!validateName()) isValid = false;
-    if (!validatePhone()) isValid = false;
-    if (!validateGuardian()) isValid = false;
-    if (!validateEmergency()) isValid = false;
-    if (!validateMedical()) isValid = false;
-    if (!validateAddress()) isValid = false;
-    if (!validateSalary()) isValid = false;
-    if (!validateRole()) isValid = false;
     if (!validateDOB()) isValid = false;
+    if (!validatePhone()) isValid = false;
+    if (!validateAddress()) isValid = false;
+    if (!validateRole()) isValid = false;
+    if (!validateSalary()) isValid = false;
     if (!validateJoinedDate()) isValid = false;
-
-    // Email is optional but must be valid if provided
-    const emailInput = document.getElementById("staff-email-input");
-    if (emailInput.value.trim() !== "" && !validateEmail()) {
-      isValid = false;
-    }
-
+    if (!validateEmail()) isValid = false;
     return isValid;
   }
 
@@ -347,35 +242,22 @@ document.addEventListener("DOMContentLoaded", function () {
       staffModalTitle.textContent = "Edit Staff";
       const staffMember = staff.find((s) => s.id === staffId);
       if (staffMember) {
-        document.getElementById("staff-name-input").value = staffMember.name;
+        document.getElementById("staff-name").value = staffMember.name;
         document.querySelector(
           `input[name="staff-gender"][value="${staffMember.gender}"]`
         ).checked = true;
-        document.getElementById("staff-dob-input").value =
-          staffMember.dateOfBirth;
-        document.getElementById("staff-phone-input").value =
-          staffMember.phoneNumber;
-        document.getElementById("staff-guardian-input").value =
-          staffMember.guardianname;
-        document.getElementById("staff-emergency-input").value =
-          staffMember.emergencyContact;
-        document.getElementById("staff-medical-input").value =
-          staffMember.medicalConditions;
-        document.getElementById("staff-email-input").value =
-          staffMember.email || "";
-        document.getElementById("staff-address-input").value =
-          staffMember.address;
-        document.getElementById("staff-shift-select").value = staffMember.shift;
-        document.getElementById("staff-joined-input").value =
-          staffMember.joinedDate;
-        document.getElementById("staff-salary-input").value =
-          staffMember.salary;
-        document.getElementById("staff-role-input").value = staffMember.role;
+        document.getElementById("staff-dob").value = staffMember.dateOfBirth;
+        document.getElementById("staff-phone").value = staffMember.phoneNumber;
+        document.getElementById("staff-email").value = staffMember.email || "";
+        document.getElementById("staff-address").value = staffMember.address;
+        document.getElementById("staff-shift").value = staffMember.shift;
+        document.getElementById("staff-role").value = staffMember.role;
+        document.getElementById("staff-salary").value = staffMember.salary;
+        document.getElementById("staff-joined").value = staffMember.joinedDate;
       }
     } else {
       staffModalTitle.textContent = "Add Staff";
       staffForm.reset();
-      // Set default gender to Male
       document.querySelector(
         'input[name="staff-gender"][value="Male"]'
       ).checked = true;
@@ -389,7 +271,6 @@ document.addEventListener("DOMContentLoaded", function () {
     isEditing = false;
     currentEditId = null;
     staffForm.reset();
-    // Clear all validation errors
     document
       .querySelectorAll(".border-red-500")
       .forEach((el) => el.classList.remove("border-red-500"));
@@ -401,51 +282,37 @@ document.addEventListener("DOMContentLoaded", function () {
   async function handleFormSubmit(e) {
     e.preventDefault();
 
-    // Validate form before submission
     if (!validateForm()) {
       showToast("Please fix the form errors before submitting", "error");
       return;
     }
 
     const formData = {
-      name: document.getElementById("staff-name-input").value.trim(),
+      name: document.getElementById("staff-name").value.trim(),
       gender: document.querySelector('input[name="staff-gender"]:checked')
         .value,
-      dateOfBirth: document.getElementById("staff-dob-input").value,
-      phoneNumber: document.getElementById("staff-phone-input").value.trim(),
-      guardianname: document
-        .getElementById("staff-guardian-input")
-        .value.trim(),
-      emergencyContact: document
-        .getElementById("staff-emergency-input")
-        .value.trim(),
-      medicalConditions: document
-        .getElementById("staff-medical-input")
-        .value.trim(),
-      email: document.getElementById("staff-email-input").value.trim() || "",
-      address: document.getElementById("staff-address-input").value.trim(),
-      shift: document.getElementById("staff-shift-select").value,
-      joinedDate: document.getElementById("staff-joined-input").value,
-      salary: document.getElementById("staff-salary-input").value,
-      role: document.getElementById("staff-role-input").value.trim(),
-      uid: "", // Will be set below
+      dateOfBirth: document.getElementById("staff-dob").value,
+      phoneNumber: document.getElementById("staff-phone").value.trim(),
+      email: document.getElementById("staff-email").value.trim() || "",
+      address: document.getElementById("staff-address").value.trim(),
+      shift: document.getElementById("staff-shift").value,
+      role: document.getElementById("staff-role").value.trim(),
+      salary: document.getElementById("staff-salary").value,
+      joinedDate: document.getElementById("staff-joined").value,
+      uid: "",
     };
 
     try {
       if (isEditing && currentEditId) {
-        // Update existing staff
         formData.uid = currentEditId;
-        const staffRef = ref(database, `staff/${currentEditId}`);
-        await update(staffRef, formData);
+        await update(ref(database, `staff/${currentEditId}`), formData);
         showToast("Staff updated successfully", "success");
       } else {
-        // Add new staff
         const newStaffRef = push(staffRef);
         formData.uid = newStaffRef.key;
         await set(newStaffRef, formData);
         showToast("Staff added successfully", "success");
       }
-
       closeStaffModal();
     } catch (error) {
       console.error("Error saving staff:", error);
@@ -455,36 +322,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function showDeleteConfirmation(staffId) {
     staffToDelete = staffId;
-    staffConfirmDelete.classList.remove("hidden");
+    staffConfirmDeleteModal.classList.remove("hidden");
   }
 
   async function confirmDelete() {
     if (!staffToDelete) return;
 
-    staffConfirmDelete.classList.add("hidden");
-
     try {
-      const staffRef = ref(database, `staff/${staffToDelete}`);
-      await remove(staffRef);
+      await remove(ref(database, `staff/${staffToDelete}`));
       showToast("Staff deleted successfully", "success");
     } catch (error) {
       console.error("Error deleting staff:", error);
       showToast("Failed to delete staff", "error");
     }
 
+    staffConfirmDeleteModal.classList.add("hidden");
     staffToDelete = null;
   }
 
   function getFilteredStaff() {
     const searchTerm = staffSearchInput.value.toLowerCase();
-    if (!searchTerm) return staff;
-
-    return staff.filter(
-      (staff) =>
-        staff.name.toLowerCase().includes(searchTerm) ||
-        (staff.email && staff.email.toLowerCase().includes(searchTerm)) ||
-        staff.phoneNumber.toLowerCase().includes(searchTerm)
-    );
+    return searchTerm
+      ? staff.filter(
+          (s) =>
+            s.name.toLowerCase().includes(searchTerm) ||
+            (s.email && s.email.toLowerCase().includes(searchTerm)) ||
+            s.phoneNumber.includes(searchTerm)
+        )
+      : staff;
   }
 
   function renderStaffTable() {
@@ -500,41 +365,41 @@ document.addEventListener("DOMContentLoaded", function () {
     if (filteredStaff.length === 0) {
       staffEmptyMsg.classList.remove("hidden");
       staffTableHead.classList.add("hidden");
-      staffPagination.classList.add("hidden");
+      staffPaginationContainer.classList.add("hidden");
     } else {
       staffEmptyMsg.classList.add("hidden");
       staffTableHead.classList.remove("hidden");
-      staffPagination.classList.remove("hidden");
+      staffPaginationContainer.classList.remove("hidden");
 
-      paginatedStaff.forEach((staff) => {
+      paginatedStaff.forEach((staffMember) => {
         const row = document.createElement("tr");
         row.className = "border-b border-gray-700 hover:bg-gray-700";
         row.innerHTML = `
           <td class="px-3 py-3">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white">
-                ${staff.name.charAt(0).toUpperCase()}
+                ${staffMember.name.charAt(0).toUpperCase()}
               </div>
-              <span>${staff.name}</span>
+              <span>${staffMember.name}</span>
             </div>
           </td>
-          <td class="px-3 py-3">${staff.role}</td>
-          <td class="px-3 py-3">${staff.phoneNumber}</td>
-          <td class="px-3 py-3">${staff.shift}</td>
+          <td class="px-3 py-3">${staffMember.role}</td>
+          <td class="px-3 py-3">${staffMember.phoneNumber}</td>
+          <td class="px-3 py-3">${staffMember.shift}</td>
           <td class="px-3 py-3">
             <div class="flex gap-2">
-              <button class="staff-view-btn p-1 text-indigo-400 hover:text-indigo-300" data-id="${
-                staff.id
+              <button class="view-btn p-1 text-indigo-400 hover:text-indigo-300" data-id="${
+                staffMember.id
               }">
                 <i class="fas fa-eye"></i>
               </button>
-              <button class="staff-edit-btn p-1 text-blue-400 hover:text-blue-300" data-id="${
-                staff.id
+              <button class="edit-btn p-1 text-blue-400 hover:text-blue-300" data-id="${
+                staffMember.id
               }">
                 <i class="fas fa-edit"></i>
               </button>
-              <button class="staff-delete-btn p-1 text-red-400 hover:text-red-300" data-id="${
-                staff.id
+              <button class="delete-btn p-1 text-red-400 hover:text-red-300" data-id="${
+                staffMember.id
               }">
                 <i class="fas fa-trash"></i>
               </button>
@@ -544,25 +409,25 @@ document.addEventListener("DOMContentLoaded", function () {
         staffTableBody.appendChild(row);
       });
 
-      document.querySelectorAll(".staff-view-btn").forEach((btn) => {
+      // Add event listeners to buttons
+      document.querySelectorAll(".view-btn").forEach((btn) => {
         btn.addEventListener("click", (e) =>
           viewStaff(e.target.closest("button").dataset.id)
         );
       });
-
-      document.querySelectorAll(".staff-edit-btn").forEach((btn) => {
+      document.querySelectorAll(".edit-btn").forEach((btn) => {
         btn.addEventListener("click", (e) =>
           openStaffModal(true, e.target.closest("button").dataset.id)
         );
       });
-
-      document.querySelectorAll(".staff-delete-btn").forEach((btn) => {
+      document.querySelectorAll(".delete-btn").forEach((btn) => {
         btn.addEventListener("click", (e) =>
           showDeleteConfirmation(e.target.closest("button").dataset.id)
         );
       });
     }
 
+    // Update pagination buttons
     staffPrevBtn.disabled = currentPage === 1;
     staffNextBtn.disabled = currentPage * itemsPerPage >= filteredStaff.length;
   }
@@ -571,14 +436,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const staffMember = staff.find((s) => s.id === staffId);
     if (!staffMember) return;
 
-    // Calculate age from DOB
-    const dob = new Date(staffMember.dateOfBirth);
-    const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const monthDiff = today.getMonth() - dob.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-      age--;
-    }
+    const age = calculateAge(staffMember.dateOfBirth);
 
     staffViewContent.innerHTML = `
       <div class="flex justify-center mb-4">
@@ -587,65 +445,45 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
       </div>
       <div class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p class="text-gray-400">Staff ID</p>
-            <p class="font-medium">${staffMember.id}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Name</p>
-            <p class="font-medium">${staffMember.name}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Gender</p>
-            <p class="font-medium">${staffMember.gender}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Date of Birth</p>
-            <p class="font-medium">${staffMember.dateOfBirth} (${age} years)</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Phone Number</p>
-            <p class="font-medium">${staffMember.phoneNumber}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Guardian Name</p>
-            <p class="font-medium">${staffMember.guardianname}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Emergency Contact</p>
-            <p class="font-medium">${staffMember.emergencyContact}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Medical Conditions</p>
-            <p class="font-medium">${
-              staffMember.medicalConditions || "None"
-            }</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Email</p>
-            <p class="font-medium">${staffMember.email || "Not specified"}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Address</p>
-            <p class="font-medium">${staffMember.address}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Shift</p>
-            <p class="font-medium">${staffMember.shift}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Joined Date</p>
-            <p class="font-medium">${staffMember.joinedDate}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Salary</p>
-            <p class="font-medium">${staffMember.salary}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Role</p>
-            <p class="font-medium">${staffMember.role}</p>
-          </div>
+        <div>
+          <p class="text-gray-400">Name</p>
+          <p class="font-medium">${staffMember.name}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Gender</p>
+          <p class="font-medium">${staffMember.gender}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Date of Birth</p>
+          <p class="font-medium">${staffMember.dateOfBirth} (${age} years)</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Phone</p>
+          <p class="font-medium">${staffMember.phoneNumber}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Email</p>
+          <p class="font-medium">${staffMember.email || "Not provided"}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Address</p>
+          <p class="font-medium">${staffMember.address}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Shift</p>
+          <p class="font-medium">${staffMember.shift}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Role</p>
+          <p class="font-medium">${staffMember.role}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Salary</p>
+          <p class="font-medium">₹${staffMember.salary}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Joined Date</p>
+          <p class="font-medium">${staffMember.joinedDate}</p>
         </div>
       </div>
     `;
@@ -670,13 +508,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     staffToastContainer.appendChild(toast);
 
-    // Auto-remove toast after 5 seconds
     setTimeout(() => {
       toast.classList.add("opacity-0", "transition-opacity", "duration-300");
       setTimeout(() => toast.remove(), 300);
     }, 5000);
 
-    // Manual close button
     toast.querySelector(".toast-close").addEventListener("click", () => {
       toast.classList.add("opacity-0", "transition-opacity", "duration-300");
       setTimeout(() => toast.remove(), 300);

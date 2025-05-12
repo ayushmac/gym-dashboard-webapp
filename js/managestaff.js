@@ -84,6 +84,249 @@ document.addEventListener("DOMContentLoaded", function () {
         renderStaffTable();
       }
     });
+
+    // Add input validation listeners
+    document
+      .getElementById("staff-name-input")
+      .addEventListener("input", validateName);
+    document
+      .getElementById("staff-phone-input")
+      .addEventListener("input", validatePhone);
+    document
+      .getElementById("staff-guardian-input")
+      .addEventListener("input", validateGuardian);
+    document
+      .getElementById("staff-emergency-input")
+      .addEventListener("input", validateEmergency);
+    document
+      .getElementById("staff-medical-input")
+      .addEventListener("input", validateMedical);
+    document
+      .getElementById("staff-email-input")
+      .addEventListener("blur", validateEmail);
+    document
+      .getElementById("staff-address-input")
+      .addEventListener("input", validateAddress);
+    document
+      .getElementById("staff-salary-input")
+      .addEventListener("input", validateSalary);
+    document
+      .getElementById("staff-role-input")
+      .addEventListener("input", validateRole);
+    document
+      .getElementById("staff-dob-input")
+      .addEventListener("change", validateDOB);
+    document
+      .getElementById("staff-joined-input")
+      .addEventListener("change", validateJoinedDate);
+  }
+
+  // Calculate age from DOB and validate (must be >=18)
+  function validateDOB() {
+    const input = document.getElementById("staff-dob-input");
+    const error = document.getElementById("dob-error");
+    const dob = new Date(input.value);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+
+    const isValid = input.value.trim().length > 0 && age >= 18;
+
+    if (!isValid) {
+      error.textContent =
+        age < 18
+          ? "Staff must be at least 18 years old"
+          : "Please select a valid date of birth";
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  // Validation functions
+  function validateName() {
+    const input = document.getElementById("staff-name-input");
+    const error = document.getElementById("name-error");
+    const isValid =
+      input.value.trim().length > 0 && /^[A-Za-z ]+$/.test(input.value.trim());
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validatePhone() {
+    const input = document.getElementById("staff-phone-input");
+    const error = document.getElementById("phone-error");
+    const isValid = /^[0-9]{10}$/.test(input.value.trim());
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateGuardian() {
+    const input = document.getElementById("staff-guardian-input");
+    const error = document.getElementById("guardian-error");
+    const isValid =
+      input.value.trim().length > 0 && /^[A-Za-z ]+$/.test(input.value.trim());
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateEmergency() {
+    const input = document.getElementById("staff-emergency-input");
+    const error = document.getElementById("emergency-error");
+    const isValid = /^[0-9]{10}$/.test(input.value.trim());
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateMedical() {
+    const input = document.getElementById("staff-medical-input");
+    const error = document.getElementById("medical-error");
+    const isValid = input.value.trim().length > 0;
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateEmail() {
+    const input = document.getElementById("staff-email-input");
+    const error = document.getElementById("email-error");
+    const value = input.value.trim();
+    const isValid = value === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateAddress() {
+    const input = document.getElementById("staff-address-input");
+    const error = document.getElementById("address-error");
+    const isValid = input.value.trim().length > 0;
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateSalary() {
+    const input = document.getElementById("staff-salary-input");
+    const error = document.getElementById("salary-error");
+    const isValid =
+      input.value.trim().length > 0 && parseFloat(input.value) >= 0;
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateRole() {
+    const input = document.getElementById("staff-role-input");
+    const error = document.getElementById("role-error");
+    const isValid = input.value.trim().length > 0;
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateJoinedDate() {
+    const input = document.getElementById("staff-joined-input");
+    const error = document.getElementById("joined-error");
+    const isValid = input.value.trim().length > 0;
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateForm() {
+    let isValid = true;
+
+    // Validate all required fields
+    if (!validateName()) isValid = false;
+    if (!validatePhone()) isValid = false;
+    if (!validateGuardian()) isValid = false;
+    if (!validateEmergency()) isValid = false;
+    if (!validateMedical()) isValid = false;
+    if (!validateAddress()) isValid = false;
+    if (!validateSalary()) isValid = false;
+    if (!validateRole()) isValid = false;
+    if (!validateDOB()) isValid = false;
+    if (!validateJoinedDate()) isValid = false;
+
+    // Email is optional but must be valid if provided
+    const emailInput = document.getElementById("staff-email-input");
+    if (emailInput.value.trim() !== "" && !validateEmail()) {
+      isValid = false;
+    }
+
+    return isValid;
   }
 
   function loadStaff() {
@@ -132,6 +375,10 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       staffModalTitle.textContent = "Add Staff";
       staffForm.reset();
+      // Set default gender to Male
+      document.querySelector(
+        'input[name="staff-gender"][value="Male"]'
+      ).checked = true;
     }
 
     staffModal.classList.remove("hidden");
@@ -142,26 +389,45 @@ document.addEventListener("DOMContentLoaded", function () {
     isEditing = false;
     currentEditId = null;
     staffForm.reset();
+    // Clear all validation errors
+    document
+      .querySelectorAll(".border-red-500")
+      .forEach((el) => el.classList.remove("border-red-500"));
+    document
+      .querySelectorAll('[id$="-error"]')
+      .forEach((el) => el.classList.add("hidden"));
   }
 
   async function handleFormSubmit(e) {
     e.preventDefault();
 
+    // Validate form before submission
+    if (!validateForm()) {
+      showToast("Please fix the form errors before submitting", "error");
+      return;
+    }
+
     const formData = {
-      name: document.getElementById("staff-name-input").value,
+      name: document.getElementById("staff-name-input").value.trim(),
       gender: document.querySelector('input[name="staff-gender"]:checked')
         .value,
       dateOfBirth: document.getElementById("staff-dob-input").value,
-      phoneNumber: document.getElementById("staff-phone-input").value,
-      guardianname: document.getElementById("staff-guardian-input").value,
-      emergencyContact: document.getElementById("staff-emergency-input").value,
-      medicalConditions: document.getElementById("staff-medical-input").value,
-      email: document.getElementById("staff-email-input").value || "",
-      address: document.getElementById("staff-address-input").value,
+      phoneNumber: document.getElementById("staff-phone-input").value.trim(),
+      guardianname: document
+        .getElementById("staff-guardian-input")
+        .value.trim(),
+      emergencyContact: document
+        .getElementById("staff-emergency-input")
+        .value.trim(),
+      medicalConditions: document
+        .getElementById("staff-medical-input")
+        .value.trim(),
+      email: document.getElementById("staff-email-input").value.trim() || "",
+      address: document.getElementById("staff-address-input").value.trim(),
       shift: document.getElementById("staff-shift-select").value,
       joinedDate: document.getElementById("staff-joined-input").value,
       salary: document.getElementById("staff-salary-input").value,
-      role: document.getElementById("staff-role-input").value,
+      role: document.getElementById("staff-role-input").value.trim(),
       uid: "", // Will be set below
     };
 
@@ -305,6 +571,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const staffMember = staff.find((s) => s.id === staffId);
     if (!staffMember) return;
 
+    // Calculate age from DOB
+    const dob = new Date(staffMember.dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+
     staffViewContent.innerHTML = `
       <div class="flex justify-center mb-4">
         <div class="w-32 h-32 rounded-full bg-indigo-500 flex items-center justify-center text-white text-4xl">
@@ -327,7 +602,7 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
           <div>
             <p class="text-gray-400">Date of Birth</p>
-            <p class="font-medium">${staffMember.dateOfBirth}</p>
+            <p class="font-medium">${staffMember.dateOfBirth} (${age} years)</p>
           </div>
           <div>
             <p class="text-gray-400">Phone Number</p>
@@ -395,11 +670,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     staffToastContainer.appendChild(toast);
 
+    // Auto-remove toast after 5 seconds
     setTimeout(() => {
       toast.classList.add("opacity-0", "transition-opacity", "duration-300");
       setTimeout(() => toast.remove(), 300);
     }, 5000);
 
+    // Manual close button
     toast.querySelector(".toast-close").addEventListener("click", () => {
       toast.classList.add("opacity-0", "transition-opacity", "duration-300");
       setTimeout(() => toast.remove(), 300);

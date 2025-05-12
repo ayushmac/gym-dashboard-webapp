@@ -11,16 +11,16 @@ import {
 document.addEventListener("DOMContentLoaded", function () {
   // DOM Elements
   const trainersTableBody = document.getElementById("trainers-table-body");
-  const noTrainersMsg = document.getElementById("no-trainers-msg");
-  const addTrainerBtn = document.getElementById("add-trainer-btn");
-  const addTrainerModal = document.getElementById("add-trainer-modal");
-  const closeTrainerModal = document.getElementById("close-trainer-modal");
-  const addTrainerForm = document.getElementById("add-trainer-form");
-  const trainerModalTitle = document.getElementById("trainer-modal-title");
-  const searchTrainersInput = document.getElementById("search-trainers-input");
-  const viewTrainerModal = document.getElementById("view-trainer-modal");
-  const closeViewTrainer = document.getElementById("close-view-trainer");
-  const viewTrainerContent = document.getElementById("view-trainer-content");
+  const noTrainersMsg = document.getElementById("trainers-empty-msg");
+  const addTrainerBtn = document.getElementById("trainers-add-btn");
+  const addTrainerModal = document.getElementById("trainers-modal");
+  const closeTrainerModal = document.getElementById("trainers-close-modal");
+  const addTrainerForm = document.getElementById("trainers-form");
+  const trainerModalTitle = document.getElementById("trainers-modal-title");
+  const searchTrainersInput = document.getElementById("trainers-search-input");
+  const viewTrainerModal = document.getElementById("trainers-view-modal");
+  const closeViewTrainer = document.getElementById("trainers-close-view");
+  const viewTrainerContent = document.getElementById("trainers-view-content");
   const prevBtn = document.getElementById("trainers-prev-btn");
   const nextBtn = document.getElementById("trainers-next-btn");
   const toastContainer = document.getElementById("trainers-toast-container");
@@ -28,11 +28,16 @@ document.addEventListener("DOMContentLoaded", function () {
   const trainersPaginationContainer = document.getElementById(
     "trainers-pagination-container"
   );
-  const confirmDeleteModal = document.getElementById("confirm-delete-modal");
-  const confirmDeleteBtn = document.getElementById("confirm-delete-btn");
-  const cancelDeleteBtn = document.getElementById("cancel-delete-btn");
-  const passwordInput = document.getElementById("trainer-password");
-  const togglePasswordBtn = document.getElementById("toggle-password");
+  const confirmDeleteModal = document.getElementById(
+    "trainers-confirm-delete-modal"
+  );
+  const confirmDeleteBtn = document.getElementById(
+    "trainers-confirm-delete-btn"
+  );
+  const cancelDeleteBtn = document.getElementById("trainers-cancel-delete-btn");
+  const passwordInput = document.getElementById("trainers-password");
+  const togglePasswordBtn = document.getElementById("trainers-toggle-password");
+  const dobInput = document.getElementById("trainers-dob");
 
   // State variables
   let trainers = [];
@@ -89,12 +94,210 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Password toggle
     togglePasswordBtn.addEventListener("click", togglePasswordVisibility);
+
+    // Date of Birth validation
+    dobInput.addEventListener("change", validateDOB);
+
+    // Form validation listeners
+    document
+      .getElementById("trainers-name")
+      .addEventListener("input", validateName);
+    document
+      .getElementById("trainers-email")
+      .addEventListener("blur", validateEmail);
+    document
+      .getElementById("trainers-mobile")
+      .addEventListener("input", validateMobile);
+    document
+      .getElementById("trainers-experience")
+      .addEventListener("input", validateExperience);
+    document
+      .getElementById("trainers-salary")
+      .addEventListener("input", validateSalary);
+    document
+      .getElementById("trainers-joined")
+      .addEventListener("change", validateJoinedDate);
+    document
+      .getElementById("trainers-password")
+      .addEventListener("input", validatePassword);
   }
 
   function togglePasswordVisibility() {
-    const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+    const type =
+      passwordInput.getAttribute("type") === "password" ? "text" : "password";
     passwordInput.setAttribute("type", type);
-    togglePasswordBtn.innerHTML = type === "password" ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    togglePasswordBtn.innerHTML =
+      type === "password"
+        ? '<i class="fas fa-eye"></i>'
+        : '<i class="fas fa-eye-slash"></i>';
+  }
+
+  function calculateAge(dob) {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  }
+
+  // Validation functions
+  function validateName() {
+    const input = document.getElementById("trainers-name");
+    const error = document.getElementById("trainers-name-error");
+    const isValid =
+      input.value.trim().length > 0 && /^[A-Za-z ]+$/.test(input.value.trim());
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateEmail() {
+    const input = document.getElementById("trainers-email");
+    const error = document.getElementById("trainers-email-error");
+    const email = input.value.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+      return false;
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+      return true;
+    }
+  }
+
+  function validateMobile() {
+    const input = document.getElementById("trainers-mobile");
+    const error = document.getElementById("trainers-mobile-error");
+    const mobile = input.value.trim();
+    const mobileRegex = /^[0-9]{10}$/;
+
+    if (!mobileRegex.test(mobile)) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+      return false;
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+      return true;
+    }
+  }
+
+  function validateDOB() {
+    const input = document.getElementById("trainers-dob");
+    const error = document.getElementById("trainers-dob-error");
+    const dob = input.value;
+
+    if (!dob) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+      return false;
+    }
+
+    const age = calculateAge(dob);
+    const isValid = age >= 18;
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateExperience() {
+    const input = document.getElementById("trainers-experience");
+    const error = document.getElementById("trainers-experience-error");
+    const value = parseInt(input.value);
+    const isValid = !isNaN(value) && value >= 0 && value <= 50;
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateSalary() {
+    const input = document.getElementById("trainers-salary");
+    const error = document.getElementById("trainers-salary-error");
+    const value = parseFloat(input.value);
+    const isValid = !isNaN(value) && value >= 0;
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateJoinedDate() {
+    const input = document.getElementById("trainers-joined");
+    const error = document.getElementById("trainers-joined-error");
+    const isValid = input.value.trim().length > 0;
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validatePassword() {
+    const input = document.getElementById("trainers-password");
+    const error = document.getElementById("trainers-password-error");
+    const isValid = input.value.length >= 6;
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateForm() {
+    let isValid = true;
+
+    if (!validateName()) isValid = false;
+    if (!validateEmail()) isValid = false;
+    if (!validateMobile()) isValid = false;
+    if (!validateDOB()) isValid = false;
+    if (!validateExperience()) isValid = false;
+    if (!validateSalary()) isValid = false;
+    if (!validateJoinedDate()) isValid = false;
+    if (!validatePassword()) isValid = false;
+
+    return isValid;
   }
 
   function loadTrainers() {
@@ -115,20 +318,36 @@ document.addEventListener("DOMContentLoaded", function () {
       trainerModalTitle.textContent = "Edit Trainer";
       const trainer = trainers.find((t) => t.id === trainerId);
       if (trainer) {
-        document.getElementById("trainer-name").value = trainer.name;
-        document.getElementById("trainer-email").value = trainer.email;
-        document.getElementById("trainer-mobile").value = trainer.mobile;
-        document.getElementById("trainer-age").value = trainer.age;
-        document.getElementById("trainer-experience").value =
+        document.getElementById("trainers-name").value = trainer.name;
+        document.getElementById("trainers-email").value = trainer.email;
+        document.getElementById("trainers-mobile").value = trainer.mobile;
+        document.getElementById("trainers-address").value =
+          trainer.address || "";
+        document.getElementById("trainers-dob").value = trainer.dob;
+
+        // Set gender radio button
+        const genderRadios = document.getElementsByName("trainers-gender");
+        for (const radio of genderRadios) {
+          if (radio.value === trainer.gender) {
+            radio.checked = true;
+            break;
+          }
+        }
+
+        document.getElementById("trainers-experience").value =
           trainer.experience;
-        document.getElementById("trainer-salary").value = trainer.salary;
-        document.getElementById("trainer-joined").value = trainer.joinedDate;
-        document.getElementById("trainer-shift").value = trainer.shift;
-        document.getElementById("trainer-password").value = trainer.password;
+        document.getElementById("trainers-salary").value = trainer.salary;
+        document.getElementById("trainers-joined").value = trainer.joinedDate;
+        document.getElementById("trainers-shift").value = trainer.shift;
+        document.getElementById("trainers-password").value = trainer.password;
       }
     } else {
       trainerModalTitle.textContent = "Add Trainer";
       addTrainerForm.reset();
+      // Set default gender to Male
+      document.querySelector(
+        'input[name="trainers-gender"][value="Male"]'
+      ).checked = true;
     }
 
     addTrainerModal.classList.remove("hidden");
@@ -142,33 +361,46 @@ document.addEventListener("DOMContentLoaded", function () {
     // Reset password visibility
     passwordInput.setAttribute("type", "password");
     togglePasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
+    // Clear validation errors
+    document
+      .querySelectorAll(".border-red-500")
+      .forEach((el) => el.classList.remove("border-red-500"));
+    document
+      .querySelectorAll('[id$="-error"]')
+      .forEach((el) => el.classList.add("hidden"));
   }
 
   async function handleFormSubmit(e) {
     e.preventDefault();
 
+    if (!validateForm()) {
+      showToast("Please fix the form errors before submitting", "error");
+      return;
+    }
+
     const formData = {
-      name: document.getElementById("trainer-name").value,
-      email: document.getElementById("trainer-email").value,
-      mobile: document.getElementById("trainer-mobile").value,
-      age: document.getElementById("trainer-age").value,
-      experience: document.getElementById("trainer-experience").value,
-      salary: document.getElementById("trainer-salary").value,
-      joinedDate: document.getElementById("trainer-joined").value,
-      shift: document.getElementById("trainer-shift").value,
-      password: document.getElementById("trainer-password").value,
+      name: document.getElementById("trainers-name").value.trim(),
+      email: document.getElementById("trainers-email").value.trim(),
+      mobile: document.getElementById("trainers-mobile").value.trim(),
+      address: document.getElementById("trainers-address").value.trim(),
+      dob: document.getElementById("trainers-dob").value,
+      gender: document.querySelector('input[name="trainers-gender"]:checked')
+        .value,
+      experience: document.getElementById("trainers-experience").value,
+      salary: document.getElementById("trainers-salary").value,
+      joinedDate: document.getElementById("trainers-joined").value,
+      shift: document.getElementById("trainers-shift").value,
+      password: document.getElementById("trainers-password").value,
       trainers_uid: "", // Will be set below
     };
 
     try {
       if (isEditing && currentEditId) {
-        // Update existing trainer
         formData.trainers_uid = currentEditId;
         const trainerRef = ref(database, `trainers/${currentEditId}`);
         await update(trainerRef, formData);
         showToast("Trainer updated successfully", "success");
       } else {
-        // Add new trainer
         const newTrainerRef = push(trainersRef);
         formData.trainers_uid = newTrainerRef.key;
         await set(newTrainerRef, formData);
@@ -247,6 +479,7 @@ document.addEventListener("DOMContentLoaded", function () {
               <span>${trainer.name}</span>
             </div>
           </td>
+          <td class="px-3 py-3">${trainer.gender}</td>
           <td class="px-3 py-3">${trainer.experience} year/s</td>
           <td class="px-3 py-3">${trainer.mobile}</td>
           <td class="px-3 py-3">${trainer.shift}</td>
@@ -301,16 +534,16 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!trainer) return;
 
     let passwordVisible = false;
-    
+
     viewTrainerContent.innerHTML = `
       <div class="flex justify-center mb-4">
         <div class="w-32 h-32 rounded-full bg-indigo-500 flex items-center justify-center text-white text-4xl">
           ${trainer.name.charAt(0).toUpperCase()}
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-4">
+      <div class="space-y-4">
         <div>
-          <p class="text-gray-400">Name</p>
+          <p class="text-gray-400">Full Name</p>
           <p class="font-medium">${trainer.name}</p>
         </div>
         <div>
@@ -322,8 +555,16 @@ document.addEventListener("DOMContentLoaded", function () {
           <p class="font-medium">${trainer.mobile}</p>
         </div>
         <div>
-          <p class="text-gray-400">Age</p>
-          <p class="font-medium">${trainer.age}</p>
+          <p class="text-gray-400">Address</p>
+          <p class="font-medium">${trainer.address || "--"}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Date of Birth</p>
+          <p class="font-medium">${trainer.dob || "--"}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Gender</p>
+          <p class="font-medium">${trainer.gender}</p>
         </div>
         <div>
           <p class="text-gray-400">Experience</p>
@@ -346,7 +587,9 @@ document.addEventListener("DOMContentLoaded", function () {
         <div>
           <p class="text-gray-400">Password</p>
           <div class="flex items-center gap-2">
-            <p class="font-medium" id="view-password">${'•'.repeat(trainer.password.length)}</p>
+            <p class="font-medium" id="view-password">${"•".repeat(
+              trainer.password.length
+            )}</p>
             <button id="toggle-view-password" class="text-gray-400 hover:text-white">
               <i class="fas fa-eye"></i>
             </button>
@@ -355,13 +598,18 @@ document.addEventListener("DOMContentLoaded", function () {
       </div>
     `;
 
-    // Add event listener for the password toggle in the view modal
-    document.getElementById("toggle-view-password").addEventListener("click", function() {
-      passwordVisible = !passwordVisible;
-      const passwordElement = document.getElementById("view-password");
-      passwordElement.textContent = passwordVisible ? trainer.password : '•'.repeat(trainer.password.length);
-      this.innerHTML = passwordVisible ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
-    });
+    document
+      .getElementById("toggle-view-password")
+      .addEventListener("click", function () {
+        passwordVisible = !passwordVisible;
+        const passwordElement = document.getElementById("view-password");
+        passwordElement.textContent = passwordVisible
+          ? trainer.password
+          : "•".repeat(trainer.password.length);
+        this.innerHTML = passwordVisible
+          ? '<i class="fas fa-eye-slash"></i>'
+          : '<i class="fas fa-eye"></i>';
+      });
 
     viewTrainerModal.classList.remove("hidden");
   }

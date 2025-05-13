@@ -1,57 +1,68 @@
-// Import necessary functions from your firebaseConfig file
 import { database, ref, onValue } from "./firebase-config.js";
 
-// References to Firebase Realtime Database nodes
-const plansRef = ref(database, "plans");
+// Database references
+const membersRef = ref(database, "members");
 const trainersRef = ref(database, "trainers");
+const staffRef = ref(database, "staff");
+const plansRef = ref(database, "plans");
 
-// Function to update the statistics in the UI
-function updateStats(plansData, trainersData) {
-  // Update total plans count
-  const totalPlans = plansData ? Object.keys(plansData).length : 0;
-  document.getElementById("stat-total-plans").textContent = totalPlans;
+// Initialize the stats dashboard
+function initDashboard() {
+  // Members count
+  onValue(
+    membersRef,
+    (snapshot) => {
+      const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+      document.getElementById("stat-total-members").textContent = count;
+    },
+    {
+      onlyOnce: false,
+    }
+  );
 
-  // Update total trainers count
-  const totalTrainers = trainersData ? Object.keys(trainersData).length : 0;
-  document.getElementById("stat-total-trainers").textContent = totalTrainers;
+  // Trainers count (only active) stat-total-trainers
+  onValue(
+    trainersRef,
+    (snapshot) => {
+      const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+      document.getElementById("stat-total-trainers").textContent = count;
+    },
+    {
+      onlyOnce: false,
+    }
+  );
+
+  // Staff count
+  onValue(
+    staffRef,
+    (snapshot) => {
+      const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+      document.getElementById("stat-total-staff").textContent = count;
+    },
+    {
+      onlyOnce: false,
+    }
+  );
+
+  // Plans count
+  onValue(
+    plansRef,
+    (snapshot) => {
+      const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+      document.getElementById("stat-total-plans").textContent = count;
+    },
+    {
+      onlyOnce: false,
+    }
+  );
 }
 
-// Listen for changes to the 'membership_plans' node
-onValue(
-  plansRef,
-  (snapshot) => {
-    const plansData = snapshot.exists() ? snapshot.val() : null;
+// Initialize when DOM is loaded
+document.addEventListener("DOMContentLoaded", initDashboard);
 
-    // Get current trainers data to maintain it when updating
-    const trainersSnapshot = document.getElementById(
-      "stat-total-trainers"
-    ).textContent;
-    const trainersData =
-      trainersSnapshot !== "‑‑" ? { count: trainersSnapshot } : null;
-
-    updateStats(plansData, trainersData);
-  },
-  (error) => {
-    console.error("Error getting plans data: ", error);
-    document.getElementById("stat-total-plans").textContent = "0";
-  }
-);
-
-// Listen for changes to the 'trainers' node
-onValue(
-  trainersRef,
-  (snapshot) => {
-    const trainersData = snapshot.exists() ? snapshot.val() : null;
-
-    // Get current plans data to maintain it when updating
-    const plansSnapshot =
-      document.getElementById("stat-total-plans").textContent;
-    const plansData = plansSnapshot !== "‑‑" ? { count: plansSnapshot } : null;
-
-    updateStats(plansData, trainersData);
-  },
-  (error) => {
-    console.error("Error getting trainers data: ", error);
-    document.getElementById("stat-total-trainers").textContent = "0";
-  }
-);
+// Error handling for all cards
+function showErrorState() {
+  document.querySelectorAll('[id^="stat-total-"]').forEach((el) => {
+    el.textContent = "--";
+  });
+}

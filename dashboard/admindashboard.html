@@ -5,33 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gym Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"
-    />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <script type="module" src="../js/auth-guard.js"></script>
-    <style>
-      /* Add to your main CSS file */
-      #crop-modal .cropper-container {
-        max-height: 60vh;
-        margin: 0 auto;
-      }
-
-      #crop-modal .cropper-modal {
-        background-color: rgba(0, 0, 0, 0.5);
-      }
-
-      #crop-modal .cropper-view-box {
-        outline: 1px solid #4f46e5;
-        outline-color: rgba(79, 70, 229, 0.75);
-      }
-    </style>
   </head>
   <body class="bg-gray-900">
     <div class="relative flex w-full min-h-screen">
@@ -1423,7 +1402,7 @@
             <h1 class="text-2xl font-bold text-white mb-6">Manage Members</h1>
 
             <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
-              <!-- Search + Add + Filter -->
+              <!-- Search + Add -->
               <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
                 <div class="relative flex-1">
                   <div class="relative">
@@ -1441,24 +1420,12 @@
                   </div>
                 </div>
 
-                <div class="flex gap-2">
-                  <select
-                    id="members-status-filter"
-                    class="p-2 rounded-lg bg-gray-700 text-white"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="expired">Expired</option>
-                  </select>
-
-                  <button
-                    id="members-add-btn"
-                    class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap text-center"
-                  >
-                    <i class="fas fa-plus"></i> Add Member
-                  </button>
-                </div>
+                <button
+                  id="members-add-btn"
+                  class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap text-center"
+                >
+                  <i class="fas fa-plus"></i> Add Member
+                </button>
               </div>
 
               <!-- Members table -->
@@ -1470,15 +1437,16 @@
                   >
                     <tr>
                       <th class="px-3 py-2">Name</th>
-                      <th class="px-3 py-2">Mobile</th>
-                      <th class="px-3 py-2">Status</th>
+                      <th class="px-3 py-2">Gender</th>
+                      <th class="px-3 py-2">Age</th>
+                      <th class="px-3 py-2">Contact</th>
                       <th class="px-3 py-2">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="members-table-body"></tbody>
                 </table>
 
-                <!-- Empty state messages -->
+                <!-- Empty state message -->
                 <div
                   id="members-empty-msg"
                   class="hidden text-center py-8 text-gray-400"
@@ -1487,43 +1455,6 @@
                   <p class="text-lg">No members available</p>
                   <p class="text-sm mt-1">
                     Click "Add Member" to add your first member
-                  </p>
-                </div>
-
-                <div
-                  id="members-empty-active"
-                  class="hidden text-center py-8 text-gray-400"
-                >
-                  <i
-                    class="fas fa-check-circle text-4xl mb-2 text-green-400"
-                  ></i>
-                  <p class="text-lg">No active members found</p>
-                  <p class="text-sm mt-1">
-                    All members are either inactive or expired
-                  </p>
-                </div>
-
-                <div
-                  id="members-empty-inactive"
-                  class="hidden text-center py-8 text-gray-400"
-                >
-                  <i class="fas fa-clock text-4xl mb-2 text-yellow-400"></i>
-                  <p class="text-lg">No inactive members found</p>
-                  <p class="text-sm mt-1">
-                    All members are either active or expired
-                  </p>
-                </div>
-
-                <div
-                  id="members-empty-expired"
-                  class="hidden text-center py-8 text-gray-400"
-                >
-                  <i
-                    class="fas fa-exclamation-triangle text-4xl mb-2 text-red-400"
-                  ></i>
-                  <p class="text-lg">No expired members found</p>
-                  <p class="text-sm mt-1">
-                    All members are either active or inactive
                   </p>
                 </div>
               </div>
@@ -1567,13 +1498,57 @@
                     <label
                       for="members-name-input"
                       class="block mb-1 text-sm text-gray-300"
-                      >Name</label
                     >
+                      Full Name <span class="text-red-500">*</span>
+                    </label>
                     <input
                       id="members-name-input"
                       required
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
+                    <p
+                      id="members-name-error"
+                      class="hidden text-red-500 text-xs mt-1"
+                    >
+                      Please enter a valid name (letters and spaces only)
+                    </p>
+                  </div>
+
+                  <!-- Gender -->
+                  <div>
+                    <label class="block mb-1 text-sm text-gray-300">
+                      Gender <span class="text-red-500">*</span>
+                    </label>
+                    <div class="flex gap-4">
+                      <label class="inline-flex items-center">
+                        <input
+                          type="radio"
+                          name="members-gender"
+                          value="Male"
+                          checked
+                          class="form-radio text-indigo-500"
+                        />
+                        <span class="ml-2 text-gray-300">Male</span>
+                      </label>
+                      <label class="inline-flex items-center">
+                        <input
+                          type="radio"
+                          name="members-gender"
+                          value="Female"
+                          class="form-radio text-indigo-500"
+                        />
+                        <span class="ml-2 text-gray-300">Female</span>
+                      </label>
+                      <label class="inline-flex items-center">
+                        <input
+                          type="radio"
+                          name="members-gender"
+                          value="Other"
+                          class="form-radio text-indigo-500"
+                        />
+                        <span class="ml-2 text-gray-300">Other</span>
+                      </label>
+                    </div>
                   </div>
 
                   <!-- DOB -->
@@ -1581,71 +1556,36 @@
                     <label
                       for="members-dob-input"
                       class="block mb-1 text-sm text-gray-300"
-                      >Date of Birth</label
                     >
+                      Date of Birth <span class="text-red-500">*</span>
+                    </label>
                     <input
                       id="members-dob-input"
                       type="date"
                       required
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
+                    <p
+                      id="members-dob-error"
+                      class="hidden text-red-500 text-xs mt-1"
+                    >
+                      Member must be at least 12 years old
+                    </p>
                   </div>
 
-                  <!-- Email -->
+                  <!-- Address -->
                   <div>
                     <label
-                      for="members-email-input"
+                      for="members-address-input"
                       class="block mb-1 text-sm text-gray-300"
-                      >Email</label
                     >
-                    <input
-                      id="members-email-input"
-                      type="email"
-                      required
+                      Address
+                    </label>
+                    <textarea
+                      id="members-address-input"
+                      rows="3"
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-                    />
-                  </div>
-
-                  <!-- Contact -->
-                  <div>
-                    <label
-                      for="members-contact-input"
-                      class="block mb-1 text-sm text-gray-300"
-                      >Contact Number</label
-                    >
-                    <input
-                      id="members-contact-input"
-                      type="tel"
-                      required
-                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-                    />
-                  </div>
-
-                  <!-- Guardian -->
-                  <div>
-                    <label
-                      for="members-guardian-input"
-                      class="block mb-1 text-sm text-gray-300"
-                      >Guardian Name</label
-                    >
-                    <input
-                      id="members-guardian-input"
-                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-                    />
-                  </div>
-
-                  <!-- Emergency Contact -->
-                  <div>
-                    <label
-                      for="members-emergency-input"
-                      class="block mb-1 text-sm text-gray-300"
-                      >Emergency Contact</label
-                    >
-                    <input
-                      id="members-emergency-input"
-                      type="tel"
-                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-                    />
+                    ></textarea>
                   </div>
 
                   <!-- Medical Conditions -->
@@ -1653,8 +1593,9 @@
                     <label
                       for="members-medical-input"
                       class="block mb-1 text-sm text-gray-300"
-                      >Medical Conditions</label
                     >
+                      Medical Conditions
+                    </label>
                     <textarea
                       id="members-medical-input"
                       rows="3"
@@ -1662,78 +1603,91 @@
                     ></textarea>
                   </div>
 
-                  <!-- Membership Status -->
+                  <!-- Contact -->
                   <div>
                     <label
-                      for="members-status-select"
+                      for="members-contact-input"
                       class="block mb-1 text-sm text-gray-300"
-                      >Membership Status</label
                     >
-                    <select
-                      id="members-status-select"
+                      Contact Number <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="members-contact-input"
+                      type="tel"
                       required
-                      class="w-full p-2 rounded-lg bg-gray-700 text-white"
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                    />
+                    <p
+                      id="members-contact-error"
+                      class="hidden text-red-500 text-xs mt-1"
                     >
-                      <option value="inactive">Inactive</option>
-                      <option value="active">Active</option>
-                      <option value="expired">Expired</option>
-                    </select>
+                      Please enter a valid 10-digit phone number
+                    </p>
                   </div>
 
-                  <!-- Plan Dates -->
-                  <div class="grid grid-cols-2 gap-4">
-                    <div>
-                      <label
-                        for="members-plan-start-input"
-                        class="block mb-1 text-sm text-gray-300"
-                        >Plan Start Date</label
-                      >
-                      <input
-                        id="members-plan-start-input"
-                        type="date"
-                        class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        for="members-plan-end-input"
-                        class="block mb-1 text-sm text-gray-300"
-                        >Plan End Date</label
-                      >
-                      <input
-                        id="members-plan-end-input"
-                        type="date"
-                        class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-                      />
-                    </div>
+                  <!-- Guardian -->
+                  <div>
+                    <label
+                      for="members-guardian-input"
+                      class="block mb-1 text-sm text-gray-300"
+                    >
+                      Guardian Name <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="members-guardian-input"
+                      required
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                    />
+                    <p
+                      id="members-guardian-error"
+                      class="hidden text-red-500 text-xs mt-1"
+                    >
+                      Please enter a valid name
+                    </p>
                   </div>
 
-                  <!-- Training Dates -->
-                  <div class="grid grid-cols-2 gap-4">
-                    <div>
-                      <label
-                        for="members-training-start-input"
-                        class="block mb-1 text-sm text-gray-300"
-                        >Training Start Date</label
-                      >
-                      <input
-                        id="members-training-start-input"
-                        type="date"
-                        class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        for="members-training-end-input"
-                        class="block mb-1 text-sm text-gray-300"
-                        >Training End Date</label
-                      >
-                      <input
-                        id="members-training-end-input"
-                        type="date"
-                        class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-                      />
-                    </div>
+                  <!-- Emergency Contact -->
+                  <div>
+                    <label
+                      for="members-emergency-input"
+                      class="block mb-1 text-sm text-gray-300"
+                    >
+                      Emergency Contact <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="members-emergency-input"
+                      type="tel"
+                      required
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                    />
+                    <p
+                      id="members-emergency-error"
+                      class="hidden text-red-500 text-xs mt-1"
+                    >
+                      Please enter a valid 10-digit phone number
+                    </p>
+                  </div>
+
+                  <!-- Email -->
+                  <div>
+                    <label
+                      for="members-email-input"
+                      class="block mb-1 text-sm text-gray-300"
+                    >
+                      Email <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="members-email-input"
+                      type="email"
+                      required
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                    />
+                    <p
+                      id="members-email-error"
+                      class="hidden text-red-500 text-xs mt-1"
+                    >
+                      Please enter a valid email address
+                    </p>
                   </div>
 
                   <!-- Password -->
@@ -1741,8 +1695,9 @@
                     <label
                       for="members-password-input"
                       class="block mb-1 text-sm text-gray-300"
-                      >Password</label
                     >
+                      Password <span class="text-red-500">*</span>
+                    </label>
                     <div class="relative">
                       <input
                         id="members-password-input"
@@ -1758,6 +1713,12 @@
                         <i class="fas fa-eye"></i>
                       </button>
                     </div>
+                    <p
+                      id="members-password-error"
+                      class="hidden text-red-500 text-xs mt-1"
+                    >
+                      Password must be at least 6 characters
+                    </p>
                   </div>
 
                   <!-- Buttons -->
@@ -1780,7 +1741,7 @@
               </div>
             </div>
 
-            <!-- Improved View Modal -->
+            <!-- View Modal -->
             <div
               id="members-view-modal"
               class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-md overflow-y-auto"

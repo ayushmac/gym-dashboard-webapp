@@ -12,11 +12,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // DOM Elements
   const membersTableBody = document.getElementById("members-table-body");
   const membersEmptyMsg = document.getElementById("members-empty-msg");
-  const membersEmptyActive = document.getElementById("members-empty-active");
-  const membersEmptyInactive = document.getElementById(
-    "members-empty-inactive"
-  );
-  const membersEmptyExpired = document.getElementById("members-empty-expired");
   const membersAddBtn = document.getElementById("members-add-btn");
   const membersModal = document.getElementById("members-modal");
   const membersCloseModal = document.getElementById("members-close-modal");
@@ -46,7 +41,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const membersTogglePassword = document.getElementById(
     "members-toggle-password"
   );
-  const membersStatusFilter = document.getElementById("members-status-filter");
 
   // State variables
   let members = [];
@@ -85,12 +79,6 @@ document.addEventListener("DOMContentLoaded", function () {
       renderMembersTable();
     });
 
-    // Status filter
-    membersStatusFilter.addEventListener("change", () => {
-      currentPage = 1;
-      renderMembersTable();
-    });
-
     // Pagination
     membersPrevBtn.addEventListener("click", () => {
       if (currentPage > 1) {
@@ -109,6 +97,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Password toggle
     membersTogglePassword.addEventListener("click", togglePasswordVisibility);
+
+    // Form validation listeners
+    document
+      .getElementById("members-name-input")
+      .addEventListener("input", validateName);
+    document
+      .getElementById("members-dob-input")
+      .addEventListener("change", validateDOB);
+    document
+      .getElementById("members-contact-input")
+      .addEventListener("input", validateContact);
+    document
+      .getElementById("members-guardian-input")
+      .addEventListener("input", validateGuardian);
+    document
+      .getElementById("members-emergency-input")
+      .addEventListener("input", validateEmergencyContact);
+    document
+      .getElementById("members-email-input")
+      .addEventListener("blur", validateEmail);
+    document
+      .getElementById("members-password-input")
+      .addEventListener("input", validatePassword);
   }
 
   function togglePasswordVisibility() {
@@ -121,6 +132,159 @@ document.addEventListener("DOMContentLoaded", function () {
       type === "password"
         ? '<i class="fas fa-eye"></i>'
         : '<i class="fas fa-eye-slash"></i>';
+  }
+
+  function calculateAge(dob) {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  }
+
+  // Validation functions
+  function validateName() {
+    const input = document.getElementById("members-name-input");
+    const error = document.getElementById("members-name-error");
+    const isValid =
+      input.value.trim().length > 0 && /^[A-Za-z ]+$/.test(input.value.trim());
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateDOB() {
+    const input = document.getElementById("members-dob-input");
+    const error = document.getElementById("members-dob-error");
+    const dob = input.value;
+
+    if (!dob) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+      return false;
+    }
+
+    const age = calculateAge(dob);
+    const isValid = age >= 12;
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateContact() {
+    const input = document.getElementById("members-contact-input");
+    const error = document.getElementById("members-contact-error");
+    const contact = input.value.trim();
+    const contactRegex = /^[0-9]{10}$/;
+
+    if (!contactRegex.test(contact)) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+      return false;
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+      return true;
+    }
+  }
+
+  function validateGuardian() {
+    const input = document.getElementById("members-guardian-input");
+    const error = document.getElementById("members-guardian-error");
+    const isValid =
+      input.value.trim().length > 0 && /^[A-Za-z ]+$/.test(input.value.trim());
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateEmergencyContact() {
+    const input = document.getElementById("members-emergency-input");
+    const error = document.getElementById("members-emergency-error");
+    const contact = input.value.trim();
+    const contactRegex = /^[0-9]{10}$/;
+
+    if (!contactRegex.test(contact)) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+      return false;
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+      return true;
+    }
+  }
+
+  function validateEmail() {
+    const input = document.getElementById("members-email-input");
+    const error = document.getElementById("members-email-error");
+    const email = input.value.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+      return false;
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+      return true;
+    }
+  }
+
+  function validatePassword() {
+    const input = document.getElementById("members-password-input");
+    const error = document.getElementById("members-password-error");
+    const isValid = input.value.length >= 6;
+
+    if (!isValid) {
+      error.classList.remove("hidden");
+      input.classList.add("border-red-500");
+    } else {
+      error.classList.add("hidden");
+      input.classList.remove("border-red-500");
+    }
+    return isValid;
+  }
+
+  function validateForm() {
+    let isValid = true;
+
+    if (!validateName()) isValid = false;
+    if (!validateDOB()) isValid = false;
+    if (!validateContact()) isValid = false;
+    if (!validateGuardian()) isValid = false;
+    if (!validateEmergencyContact()) isValid = false;
+    if (!validateEmail()) isValid = false;
+    if (!validatePassword()) isValid = false;
+
+    return isValid;
   }
 
   function loadMembers() {
@@ -141,35 +305,32 @@ document.addEventListener("DOMContentLoaded", function () {
       membersModalTitle.textContent = "Edit Member";
       const member = members.find((m) => m.id === memberId);
       if (member) {
-        document.getElementById("members-name-input").value = member.name;
+        document.getElementById("members-name-input").value = member.full_name;
+        document.querySelector(
+          `input[name="members-gender"][value="${member.gender}"]`
+        ).checked = true;
         document.getElementById("members-dob-input").value = member.dob;
-        document.getElementById("members-email-input").value = member.email;
+        document.getElementById("members-address-input").value =
+          member.address || "";
+        document.getElementById("members-medical-input").value =
+          member.medical_conditions || "";
         document.getElementById("members-contact-input").value =
           member.contact_no;
         document.getElementById("members-guardian-input").value =
           member.guardian_name;
         document.getElementById("members-emergency-input").value =
           member.emergency_contact_no;
-        document.getElementById("members-medical-input").value =
-          member.medical_conditions;
-        document.getElementById("members-status-select").value =
-          member.membership_status;
-        document.getElementById("members-plan-start-input").value =
-          member.plan_start_date;
-        document.getElementById("members-plan-end-input").value =
-          member.plan_end_date;
-        document.getElementById("members-training-start-input").value =
-          member.training_start_date;
-        document.getElementById("members-training-end-input").value =
-          member.training_end_date;
+        document.getElementById("members-email-input").value = member.email;
         document.getElementById("members-password-input").value =
           member.password;
       }
     } else {
       membersModalTitle.textContent = "Add Member";
       membersForm.reset();
-      // Set default status to inactive
-      document.getElementById("members-status-select").value = "inactive";
+      // Set default gender to Male
+      document.querySelector(
+        'input[name="members-gender"][value="Male"]'
+      ).checked = true;
     }
 
     membersModal.classList.remove("hidden");
@@ -183,50 +344,55 @@ document.addEventListener("DOMContentLoaded", function () {
     // Reset password visibility
     membersPasswordInput.setAttribute("type", "password");
     membersTogglePassword.innerHTML = '<i class="fas fa-eye"></i>';
+    // Clear validation errors
+    document
+      .querySelectorAll(".border-red-500")
+      .forEach((el) => el.classList.remove("border-red-500"));
+    document
+      .querySelectorAll('[id$="-error"]')
+      .forEach((el) => el.classList.add("hidden"));
   }
 
   async function handleFormSubmit(e) {
     e.preventDefault();
 
+    if (!validateForm()) {
+      showToast("Please fix the form errors before submitting", "error");
+      return;
+    }
+
     const formData = {
-      name: document.getElementById("members-name-input").value,
+      full_name: document.getElementById("members-name-input").value.trim(),
+      gender: document.querySelector('input[name="members-gender"]:checked')
+        .value,
       dob: document.getElementById("members-dob-input").value,
-      email: document.getElementById("members-email-input").value,
-      contact_no: document.getElementById("members-contact-input").value,
-      guardian_name: document.getElementById("members-guardian-input").value,
-      emergency_contact_no: document.getElementById("members-emergency-input")
-        .value,
-      medical_conditions: document.getElementById("members-medical-input")
-        .value,
-      membership_status: document.getElementById("members-status-select").value,
-      plan_start_date: document.getElementById("members-plan-start-input")
-        .value,
-      plan_end_date: document.getElementById("members-plan-end-input").value,
-      training_start_date: document.getElementById(
-        "members-training-start-input"
-      ).value,
-      training_end_date: document.getElementById("members-training-end-input")
-        .value,
+      address: document.getElementById("members-address-input").value.trim(),
+      medical_conditions: document
+        .getElementById("members-medical-input")
+        .value.trim(),
+      contact_no: document.getElementById("members-contact-input").value.trim(),
+      guardian_name: document
+        .getElementById("members-guardian-input")
+        .value.trim(),
+      emergency_contact_no: document
+        .getElementById("members-emergency-input")
+        .value.trim(),
+      email: document.getElementById("members-email-input").value.trim(),
       password: document.getElementById("members-password-input").value,
-      uid: "", // Will be set below
-      due: "",
-      payment_id: "",
-      plan_name: "",
-      plan_description: "",
-      assigned_trainer_name: "",
+      member_uid: "", // Will be set below
     };
 
     try {
       if (isEditing && currentEditId) {
         // Update existing member
-        formData.uid = currentEditId;
+        formData.member_uid = currentEditId;
         const memberRef = ref(database, `members/${currentEditId}`);
         await update(memberRef, formData);
         showToast("Member updated successfully", "success");
       } else {
         // Add new member
         const newMemberRef = push(membersRef);
-        formData.uid = newMemberRef.key;
+        formData.member_uid = newMemberRef.key;
         await set(newMemberRef, formData);
         showToast("Member added successfully", "success");
       }
@@ -262,28 +428,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function getFilteredMembers() {
     const searchTerm = membersSearchInput.value.toLowerCase();
-    const statusFilterValue = membersStatusFilter.value;
+    if (!searchTerm) return members;
 
-    let filtered = members;
-
-    // Apply status filter
-    if (statusFilterValue !== "all") {
-      filtered = filtered.filter(
-        (member) => member.membership_status === statusFilterValue
-      );
-    }
-
-    // Apply search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (member) =>
-          member.name.toLowerCase().includes(searchTerm) ||
-          member.email.toLowerCase().includes(searchTerm) ||
-          member.contact_no.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    return filtered;
+    return members.filter(
+      (member) =>
+        member.full_name.toLowerCase().includes(searchTerm) ||
+        member.email.toLowerCase().includes(searchTerm) ||
+        member.contact_no.toLowerCase().includes(searchTerm)
+    );
   }
 
   function renderMembersTable() {
@@ -294,29 +446,14 @@ document.addEventListener("DOMContentLoaded", function () {
       startIndex + itemsPerPage
     );
 
-    // Hide all empty messages first
-    membersEmptyMsg.classList.add("hidden");
-    membersEmptyActive.classList.add("hidden");
-    membersEmptyInactive.classList.add("hidden");
-    membersEmptyExpired.classList.add("hidden");
     membersTableBody.innerHTML = "";
 
     if (filteredMembers.length === 0) {
+      membersEmptyMsg.classList.remove("hidden");
       membersTableHead.classList.add("hidden");
       membersPagination.classList.add("hidden");
-
-      // Show appropriate empty message based on filter
-      const statusFilter = membersStatusFilter.value;
-      if (statusFilter === "active") {
-        membersEmptyActive.classList.remove("hidden");
-      } else if (statusFilter === "inactive") {
-        membersEmptyInactive.classList.remove("hidden");
-      } else if (statusFilter === "expired") {
-        membersEmptyExpired.classList.remove("hidden");
-      } else {
-        membersEmptyMsg.classList.remove("hidden");
-      }
     } else {
+      membersEmptyMsg.classList.add("hidden");
       membersTableHead.classList.remove("hidden");
       membersPagination.classList.remove("hidden");
 
@@ -324,40 +461,20 @@ document.addEventListener("DOMContentLoaded", function () {
         const row = document.createElement("tr");
         row.className = "border-b border-gray-700 hover:bg-gray-700";
 
-        // Determine status badge color
-        let statusClass = "";
-        switch (member.membership_status) {
-          case "active":
-            statusClass = "bg-green-500";
-            break;
-          case "inactive":
-            statusClass = "bg-yellow-500";
-            break;
-          case "expired":
-            statusClass = "bg-red-500";
-            break;
-          default:
-            statusClass = "bg-gray-500";
-        }
+        const age = member.dob ? calculateAge(member.dob) : "--";
 
         row.innerHTML = `
           <td class="px-3 py-3">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white">
-                ${member.name.charAt(0).toUpperCase()}
+                ${member.full_name.charAt(0).toUpperCase()}
               </div>
-              <span>${member.name}</span>
+              <span>${member.full_name}</span>
             </div>
           </td>
+          <td class="px-3 py-3">${member.gender}</td>
+          <td class="px-3 py-3">${age}</td>
           <td class="px-3 py-3">${member.contact_no}</td>
-          <td class="px-3 py-3">
-            <span class="px-2 py-1 rounded-full text-xs ${statusClass}">
-              ${
-                member.membership_status.charAt(0).toUpperCase() +
-                member.membership_status.slice(1)
-              }
-            </span>
-          </td>
           <td class="px-3 py-3">
             <div class="flex gap-2">
               <button class="members-view-btn p-1 text-indigo-400 hover:text-indigo-300" data-id="${
@@ -411,105 +528,65 @@ document.addEventListener("DOMContentLoaded", function () {
     const member = members.find((m) => m.id === memberId);
     if (!member) return;
 
+    const age = member.dob ? calculateAge(member.dob) : "--";
     let passwordVisible = false;
 
     membersViewContent.innerHTML = `
       <div class="flex justify-center mb-4">
         <div class="w-32 h-32 rounded-full bg-indigo-500 flex items-center justify-center text-white text-4xl">
-          ${member.name.charAt(0).toUpperCase()}
+          ${member.full_name.charAt(0).toUpperCase()}
         </div>
       </div>
       <div class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p class="text-gray-400">Member ID</p>
-            <p class="font-medium">${member.id}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Name</p>
-            <p class="font-medium">${member.name}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Date of Birth</p>
-            <p class="font-medium">${member.dob}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Email</p>
-            <p class="font-medium">${member.email}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Contact Number</p>
-            <p class="font-medium">${member.contact_no}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Guardian Name</p>
-            <p class="font-medium">${member.guardian_name}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Emergency Contact</p>
-            <p class="font-medium">${member.emergency_contact_no}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Medical Conditions</p>
-            <p class="font-medium">${member.medical_conditions || "None"}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Membership Status</p>
-            <p class="font-medium">${
-              member.membership_status.charAt(0).toUpperCase() +
-              member.membership_status.slice(1)
-            }</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Due Amount</p>
-            <p class="font-medium">${member.due || "Not set"}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Payment ID</p>
-            <p class="font-medium">${member.payment_id || "Not set"}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Plan Name</p>
-            <p class="font-medium">${member.plan_name || "Not set"}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Plan Description</p>
-            <p class="font-medium">${member.plan_description || "Not set"}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Plan Start Date</p>
-            <p class="font-medium">${member.plan_start_date || "Not set"}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Plan End Date</p>
-            <p class="font-medium">${member.plan_end_date || "Not set"}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Assigned Trainer</p>
-            <p class="font-medium">${
-              member.assigned_trainer_name || "Not assigned"
-            }</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Training Start Date</p>
-            <p class="font-medium">${
-              member.training_start_date || "Not set"
-            }</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Training End Date</p>
-            <p class="font-medium">${member.training_end_date || "Not set"}</p>
-          </div>
-          <div>
-            <p class="text-gray-400">Password</p>
-            <div class="flex items-center gap-2">
-              <p class="font-medium" id="members-view-password">${"•".repeat(
-                member.password.length
-              )}</p>
-              <button id="members-toggle-view-password" class="text-gray-400 hover:text-white">
-                <i class="fas fa-eye"></i>
-              </button>
-            </div>
+        <div>
+          <p class="text-gray-400">Member ID</p>
+          <p class="font-medium">${member.id}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Full Name</p>
+          <p class="font-medium">${member.full_name}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Gender</p>
+          <p class="font-medium">${member.gender}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Date of Birth</p>
+          <p class="font-medium">${member.dob || "--"} (${age} years)</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Address</p>
+          <p class="font-medium">${member.address || "--"}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Medical Conditions</p>
+          <p class="font-medium">${member.medical_conditions || "None"}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Contact Number</p>
+          <p class="font-medium">${member.contact_no}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Guardian Name</p>
+          <p class="font-medium">${member.guardian_name}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Emergency Contact</p>
+          <p class="font-medium">${member.emergency_contact_no}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Email</p>
+          <p class="font-medium">${member.email}</p>
+        </div>
+        <div>
+          <p class="text-gray-400">Password</p>
+          <div class="flex items-center gap-2">
+            <p class="font-medium" id="members-view-password">${"•".repeat(
+              member.password.length
+            )}</p>
+            <button id="members-toggle-view-password" class="text-gray-400 hover:text-white">
+              <i class="fas fa-eye"></i>
+            </button>
           </div>
         </div>
       </div>

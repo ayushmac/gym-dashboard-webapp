@@ -185,9 +185,7 @@
 
           <!-- ────────────────────────── Member Plans tab ────────────────────────── -->
           <section id="member-plans" class="tab-content hidden">
-            <h1 class="text-2xl font-bold text-white mb-6">
-              Manage Member Plans
-            </h1>
+            <h1 class="text-2xl font-bold text-white mb-6">Manage Plans</h1>
 
             <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
               <!-- Search + Add -->
@@ -220,10 +218,11 @@
                 <table class="w-full text-sm text-left text-gray-200">
                   <thead class="uppercase text-xs bg-gray-700">
                     <tr>
-                      <th class="px-3 py-2">Plan</th>
+                      <th class="px-3 py-2">Plan Name</th>
                       <th class="px-3 py-2">Description</th>
+                      <th class="px-3 py-2">Amount</th>
                       <th class="px-3 py-2">Duration</th>
-                      <th class="px-3 py-2">Trainer?</th>
+                      <th class="px-3 py-2">Type</th>
                       <th class="px-3 py-2">Actions</th>
                     </tr>
                   </thead>
@@ -266,6 +265,7 @@
             >
               <div
                 class="bg-gray-800 w-11/12 max-w-md rounded-xl p-6 shadow-2xl"
+                id="modal-content"
               >
                 <h2
                   id="modal-title"
@@ -280,13 +280,20 @@
                     <label
                       for="plan-name"
                       class="block mb-1 text-sm text-gray-300"
-                      >Plan name</label
                     >
+                      Plan name <span class="text-red-500">*</span>
+                    </label>
                     <input
                       id="plan-name"
                       required
+                      minlength="3"
+                      maxlength="50"
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                      placeholder="Enter plan name"
                     />
+                    <p class="text-xs text-red-400 mt-1 hidden" id="name-error">
+                      Plan name must be 3-50 characters
+                    </p>
                   </div>
 
                   <!-- Description -->
@@ -294,14 +301,21 @@
                     <label
                       for="plan-description"
                       class="block mb-1 text-sm text-gray-300"
-                      >Description</label
                     >
+                      Description <span class="text-red-500">*</span>
+                    </label>
                     <textarea
                       id="plan-description"
                       required
+                      minlength="10"
+                      maxlength="500"
                       rows="3"
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                      placeholder="Enter plan description"
                     ></textarea>
+                    <p class="text-xs text-red-400 mt-1 hidden" id="desc-error">
+                      Description must be 10-500 characters
+                    </p>
                   </div>
 
                   <!-- Amount -->
@@ -309,46 +323,24 @@
                     <label
                       for="plan-amount"
                       class="block mb-1 text-sm text-gray-300"
-                      >Amount (₹)</label
                     >
+                      Amount (₹)<span class="text-red-500">*</span>
+                    </label>
                     <input
                       id="plan-amount"
                       type="number"
-                      min="0"
+                      min="1"
+                      max="100000"
                       required
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                      placeholder="Enter amount in rupees"
                     />
-                  </div>
-
-                  <!-- Includes trainer -->
-                  <div class="flex items-center gap-2">
-                    <input
-                      id="includes-trainer"
-                      type="checkbox"
-                      class="h-4 w-4"
-                    />
-                    <label for="includes-trainer" class="text-sm text-gray-300"
-                      >Includes trainer</label
+                    <p
+                      class="text-xs text-red-400 mt-1 hidden"
+                      id="amount-error"
                     >
-                  </div>
-
-                  <!-- Trainer duration (wrapper toggled by JS) -->
-                  <div id="trainer-duration-wrap" class="hidden">
-                    <label
-                      for="trainer-duration"
-                      class="block mb-1 text-sm text-gray-300"
-                    >
-                      Trainer duration
-                    </label>
-                    <select
-                      id="trainer-duration"
-                      class="w-full p-2 rounded-lg bg-gray-700 text-white"
-                    >
-                      <option value="1">1 month</option>
-                      <option value="3">3 months</option>
-                      <option value="6">6 months</option>
-                      <option value="12">12 months</option>
-                    </select>
+                      Amount must be between ₹1 and ₹100,000
+                    </p>
                   </div>
 
                   <!-- Plan duration -->
@@ -356,17 +348,41 @@
                     <label
                       for="plan-duration"
                       class="block mb-1 text-sm text-gray-300"
-                      >Plan duration</label
                     >
+                      Duration<span class="text-red-500">*</span>
+                    </label>
                     <select
                       id="plan-duration"
                       required
                       class="w-full p-2 rounded-lg bg-gray-700 text-white"
                     >
-                      <option value="1">1 month</option>
-                      <option value="3">3 months</option>
-                      <option value="6">6 months</option>
-                      <option value="12">12 months</option>
+                      <option value="">Select duration</option>
+                      <option value="1 day">1 day</option>
+                      <option value="1 month">1 month</option>
+                      <option value="3 months">3 months</option>
+                      <option value="6 months">6 months</option>
+                      <option value="12 months">12 months</option>
+                    </select>
+                  </div>
+
+                  <!-- Plan type -->
+                  <div>
+                    <label
+                      for="plan-type"
+                      class="block mb-1 text-sm text-gray-300"
+                    >
+                      Plan Type<span class="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="plan-type"
+                      required
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white"
+                    >
+                      <option value="">Select plan type</option>
+                      <option value="Membership Plan">Membership Plan</option>
+                      <option value="Personal Training Plan">
+                        Personal Training Plan
+                      </option>
                     </select>
                   </div>
 
@@ -396,21 +412,71 @@
               class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-md"
             >
               <div
-                class="bg-gray-800 w-11/12 max-w-md rounded-xl p-6 shadow-2xl"
+                class="bg-gray-800 w-11/12 max-w-2xl rounded-xl shadow-2xl mx-4 flex flex-col"
+                id="view-modal-content"
+                style="max-height: 90vh"
               >
-                <h2 class="text-xl font-semibold text-white mb-4">
-                  Plan details
-                </h2>
-                <div
-                  id="view-content"
-                  class="space-y-2 text-gray-200 text-sm"
-                ></div>
-                <button
-                  id="close-view"
-                  class="mt-4 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg w-full"
-                >
-                  Close
-                </button>
+                <div class="p-6 border-b border-gray-700">
+                  <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-semibold text-white">
+                      Plan Details
+                    </h2>
+                    <button
+                      id="close-view"
+                      class="text-gray-400 hover:text-white"
+                    >
+                      <i class="fas fa-times text-xl"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="overflow-y-auto p-6 space-y-6">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                      <div>
+                        <h3 class="text-sm font-medium text-gray-400">
+                          Plan Name
+                        </h3>
+                        <p id="view-name" class="mt-1 text-white"></p>
+                      </div>
+
+                      <div>
+                        <h3 class="text-sm font-medium text-gray-400">
+                          Amount
+                        </h3>
+                        <p id="view-amount" class="mt-1 text-white"></p>
+                      </div>
+
+                      <div>
+                        <h3 class="text-sm font-medium text-gray-400">
+                          Duration
+                        </h3>
+                        <p id="view-duration" class="mt-1 text-white"></p>
+                      </div>
+                    </div>
+
+                    <div class="space-y-4">
+                      <div>
+                        <h3 class="text-sm font-medium text-gray-400">
+                          Plan Type
+                        </h3>
+                        <p id="view-type" class="mt-1 text-white"></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 class="text-sm font-medium text-gray-400">
+                      Description
+                    </h3>
+                    <div class="mt-2 p-3 bg-gray-700 rounded-lg">
+                      <p
+                        id="view-description"
+                        class="text-white whitespace-pre-line break-words"
+                      ></p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 

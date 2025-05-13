@@ -1,104 +1,154 @@
 import { database, ref, get } from "./firebase-config.js";
 
-// On page load, set admin tab
-document.addEventListener("DOMContentLoaded", () => switchTab("admin"));
+// DOM Elements
+const adminForm = document.getElementById("admin-form");
+const togglePasswordBtn = document.getElementById("toggle-password");
+const passwordInput = document.getElementById("admin-password");
+const loader = document.getElementById("loader");
+const rememberMe = document.getElementById("remember-me");
 
-// Tab switching
-window.switchTab = function (tab) {
-  document
-    .querySelectorAll(".login-form")
-    .forEach((form) => form.classList.add("hidden"));
-  document.querySelectorAll('[id$="-tab"]').forEach((el) => {
-    el.classList.remove("border-blue-500", "text-blue-400");
-    el.classList.add("border-transparent", "text-gray-400");
-  });
+// Initialize the page
+document.addEventListener("DOMContentLoaded", () => {
+  // Check for saved credentials if "Remember me" was checked
+  const savedEmail = localStorage.getItem("rememberedEmail");
+  const savedPassword = localStorage.getItem("rememberedPassword");
 
-  document.getElementById(`${tab}-form`).classList.remove("hidden");
-  const tabEl = document.getElementById(`${tab}-tab`);
-  tabEl.classList.add("border-blue-500", "text-blue-400");
-  tabEl.classList.remove("border-transparent", "text-gray-400");
-};
-
-// Toast utility
-window.showToast = function (message, type = "info") {
-  const toast = document.getElementById("toast");
-  const toastBox = document.getElementById("toast-box");
-  const toastIcon = document.getElementById("toast-icon");
-  const toastMessage = document.getElementById("toast-message");
-
-  toastMessage.textContent = message;
-
-  // Styling
-  if (type === "error") {
-    toastBox.classList.replace("border-l-4", "border-l-4");
-    toastBox.classList.add("border-red-500");
-    toastIcon.className = "fas fa-exclamation-circle text-red-500 mt-1 mr-2";
-  } else if (type === "success") {
-    toastBox.classList.replace("border-l-4", "border-l-4");
-    toastBox.classList.add("border-green-500");
-    toastIcon.className = "fas fa-check-circle text-green-500 mt-1 mr-2";
-  } else {
-    toastBox.classList.replace("border-l-4", "border-l-4");
-    toastBox.classList.add("border-blue-500");
-    toastIcon.className = "fas fa-info-circle text-blue-500 mt-1 mr-2";
+  if (savedEmail && savedPassword) {
+    document.getElementById("admin-email").value = savedEmail;
+    document.getElementById("admin-password").value = savedPassword;
+    rememberMe.checked = true;
   }
 
-  toast.classList.remove("hidden");
-  setTimeout(() => toast.classList.add("hidden"), 4000);
+  // Check if already logged in
+  if (localStorage.getItem("isAdminAuth") === "true") {
+    window.location.href = "/dashboard/admindashboard.html";
+  }
+});
+
+// Toggle password visibility
+togglePasswordBtn.addEventListener("click", () => {
+  const type =
+    passwordInput.getAttribute("type") === "password" ? "text" : "password";
+  passwordInput.setAttribute("type", type);
+
+  // Toggle eye icon
+  const eyeIcon = togglePasswordBtn.querySelector("i");
+  eyeIcon.classList.toggle("fa-eye");
+  eyeIcon.classList.toggle("fa-eye-slash");
+});
+
+// Show toast notification
+const showToast = (message, type = "info") => {
+  const toastContainer = document.getElementById("toast-container");
+  const toast = document.createElement("div");
+  toast.className = `toast p-4 rounded-lg shadow-lg text-white flex items-center justify-between ${getToastClass(
+    type
+  )}`;
+  toast.innerHTML = `
+    <div class="flex items-center gap-3">
+      <i class="${getToastIcon(type)}"></i>
+      <span class="text-sm">${message}</span>
+    </div>
+    <button class="toast-close ml-4">
+      <i class="fas fa-times"></i>
+    </button>
+  `;
+
+  toastContainer.appendChild(toast);
+
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    toast.classList.add("opacity-0", "transition-opacity", "duration-300");
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
+
+  // Close button
+  toast.querySelector(".toast-close").addEventListener("click", () => {
+    toast.classList.add("opacity-0", "transition-opacity", "duration-300");
+    setTimeout(() => toast.remove(), 300);
+  });
 };
 
-window.hideToast = () =>
-  document.getElementById("toast").classList.add("hidden");
+const getToastClass = (type) => {
+  switch (type) {
+    case "success":
+      return "bg-green-600";
+    case "error":
+      return "bg-red-600";
+    case "warning":
+      return "bg-yellow-600";
+    default:
+      return "bg-indigo-600";
+  }
+};
 
-function toggleLoader(show) {
-  document.getElementById("loader").classList.toggle("hidden", !show);
-}
+const getToastIcon = (type) => {
+  switch (type) {
+    case "success":
+      return "fas fa-check-circle";
+    case "error":
+      return "fas fa-exclamation-circle";
+    case "warning":
+      return "fas fa-exclamation-triangle";
+    default:
+      return "fas fa-info-circle";
+  }
+};
 
-// Admin Login
-document.getElementById("admin-form").addEventListener("submit", function (e) {
+// Toggle loader
+const toggleLoader = (show) => {
+  loader.classList.toggle("hidden", !show);
+  document.body.style.overflow = show ? "hidden" : "";
+};
+
+// Form submission
+adminForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const email = document.getElementById("admin-email").value;
-  const password = document.getElementById("admin-password").value;
+
+  const email = document.getElementById("admin-email").value.trim();
+  const password = document.getElementById("admin-password").value.trim();
+
+  if (!email || !password) {
+    showToast("Please fill in all fields", "error");
+    return;
+  }
+
+  // Save credentials if "Remember me" is checked
+  if (rememberMe.checked) {
+    localStorage.setItem("rememberedEmail", email);
+    localStorage.setItem("rememberedPassword", password);
+  } else {
+    localStorage.removeItem("rememberedEmail");
+    localStorage.removeItem("rememberedPassword");
+  }
+
   toggleLoader(true);
-  validateAdminLogin(email, password);
+  await validateAdminLogin(email, password);
 });
 
-function validateAdminLogin(email, password) {
-  const loginRef = ref(database, "/admin/login");
+// Validate admin login
+async function validateAdminLogin(email, password) {
+  try {
+    const snapshot = await get(ref(database, "/admin/login"));
+    toggleLoader(false);
 
-  get(loginRef)
-    .then((snapshot) => {
-      toggleLoader(false);
-
-      if (snapshot.exists()) {
-        const credentials = snapshot.val();
-        if (credentials.email === email && credentials.password === password) {
-          // 🔹 remember auth
-          localStorage.setItem("isAdminAuth", "true");
-          showToast("Login successful! Redirecting...", "success");
-          setTimeout(() => {
-            window.location.href = "/dashboard/admindashboard.html";
-          }, 1500);
-        } else {
-          showToast("Invalid credentials. Please try again.", "error");
-        }
+    if (snapshot.exists()) {
+      const credentials = snapshot.val();
+      if (credentials.email === email && credentials.password === password) {
+        localStorage.setItem("isAdminAuth", "true");
+        showToast("Login successful! Redirecting...", "success");
+        setTimeout(() => {
+          window.location.href = "/dashboard/admindashboard.html";
+        }, 1500);
       } else {
-        showToast("No admin credentials found in database.", "error");
+        showToast("Invalid email or password", "error");
       }
-    })
-    .catch((error) => {
-      toggleLoader(false);
-      console.error(error);
-      showToast("An error occurred. Please try again later.", "error");
-    });
+    } else {
+      showToast("Admin credentials not found", "error");
+    }
+  } catch (error) {
+    toggleLoader(false);
+    console.error("Login error:", error);
+    showToast("An error occurred. Please try again.", "error");
+  }
 }
-
-// Placeholder for member/trainer
-document.getElementById("member-form").addEventListener("submit", (e) => {
-  e.preventDefault();
-  showToast("Member login functionality coming soon!", "info");
-});
-document.getElementById("trainer-form").addEventListener("submit", (e) => {
-  e.preventDefault();
-  showToast("Trainer login functionality coming soon!", "info");
-});

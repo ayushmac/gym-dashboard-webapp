@@ -1,5 +1,5 @@
-/* manageplans.js – v2.2
-   Enhanced toast notifications to match trainers implementation */
+/* manageplans.js – v3.2
+   Improved view modal with vertical scrolling and removed UID display */
 
 import { database, ref, push, set, get, child } from "./firebase-config.js";
 
@@ -7,22 +7,32 @@ import { database, ref, push, set, get, child } from "./firebase-config.js";
 const searchInput = document.getElementById("search-input");
 const addBtn = document.getElementById("add-plan-btn");
 const modal = document.getElementById("add-plan-modal");
+const modalContent = document.getElementById("modal-content");
 const closeBtn = document.getElementById("close-modal");
 const form = document.getElementById("add-plan-form");
 const tblBody = document.getElementById("plans-table-body");
 const tblHead = document.querySelector("thead");
 const prevBtn = document.getElementById("prev-btn");
 const nextBtn = document.getElementById("next-btn");
-const trainerChk = document.getElementById("includes-trainer");
-const trainerWrap = document.getElementById("trainer-duration-wrap");
-const trainerSelect = document.getElementById("trainer-duration");
 const modalTitle = document.getElementById("modal-title");
 const noRecordsMsg = document.getElementById("no-records");
 
+// Validation error elements
+const nameError = document.getElementById("name-error");
+const descError = document.getElementById("desc-error");
+const amountError = document.getElementById("amount-error");
+
 /* View modal */
 const viewModal = document.getElementById("view-plan-modal");
-const viewContent = document.getElementById("view-content");
+const viewModalContent = document.getElementById("view-modal-content");
 const closeViewBtn = document.getElementById("close-view");
+
+// View modal elements
+const viewName = document.getElementById("view-name");
+const viewDescription = document.getElementById("view-description");
+const viewAmount = document.getElementById("view-amount");
+const viewDuration = document.getElementById("view-duration");
+const viewType = document.getElementById("view-type");
 
 /* Toast container */
 const toastContainer = document.getElementById("plans-toast-container");
@@ -38,7 +48,13 @@ const show = (el) => el.classList.remove("hidden");
 const hide = (el) => el.classList.add("hidden");
 const resetForm = () => {
   form.reset();
-  hide(trainerWrap);
+  hideValidationErrors();
+};
+
+const hideValidationErrors = () => {
+  hide(nameError);
+  hide(descError);
+  hide(amountError);
 };
 
 /* Enhanced toast functionality */
@@ -102,25 +118,17 @@ const getToastIcon = (type) => {
   }
 };
 
-/* click‑outside to close */
-[modal, viewModal].forEach((m) => {
-  m.addEventListener("click", (e) => {
-    if (e.target === m) hide(m);
-  });
-});
-
-/* ---------- trainer checkbox toggle ---------- */
-trainerChk.onchange = () =>
-  trainerChk.checked ? show(trainerWrap) : hide(trainerWrap);
+/* Prevent modal close when clicking inside content */
+modalContent.addEventListener("click", (e) => e.stopPropagation());
+viewModalContent.addEventListener("click", (e) => e.stopPropagation());
 
 /* ---------- data ---------- */
 const fetchPlans = async () => {
   try {
-    const snap = await get(ref(database, "membership_plans"));
+    const snap = await get(ref(database, "plans"));
     cache = snap.exists() ? Object.entries(snap.val()) : [];
     currentPage = 1;
     filterAndRender();
-    //showToast("Plans loaded successfully", "success");
   } catch (error) {
     showToast("Failed to fetch plans", "error");
     console.error("Error fetching plans:", error);
@@ -160,9 +168,10 @@ const render = (rows) => {
     tr.className = "border-b border-gray-700";
     tr.innerHTML = `
                <td class="px-3 py-2">${p.plan_name}</td>
-               <td class="px-3 py-2 truncate max-w-xs">${p.plan_description}</td>
-               <td class="px-3 py-2">${p.plan_duration} month/s</td>
-               <td class="px-3 py-2">${p.includes_trainer}</td>
+               <td class="px-3 py-2 truncate max-w-xs">${p.description}</td>
+               <td class="px-3 py-2">₹${p.amount}</td>
+               <td class="px-3 py-2">${p.plan_duration}</td>
+               <td class="px-3 py-2">${p.plan_type}</td>
                <td class="px-3 py-2 space-x-2">
                  <button data-view="${uid}" class="text-indigo-400 hover:text-indigo-300">
                    <i class="fas fa-eye"></i>
@@ -188,13 +197,13 @@ const updatePager = (total) => {
 const upsertPlan = async (data) => {
   try {
     if (editingUid) {
-      await set(ref(database, `membership_plans/${editingUid}`), {
+      await set(ref(database, `plans/${editingUid}`), {
         ...data,
         plan_uid: editingUid,
       });
       showToast("Plan updated successfully!", "success");
     } else {
-      const newRef = push(ref(database, "membership_plans"));
+      const newRef = push(ref(database, "plans"));
       await set(newRef, { ...data, plan_uid: newRef.key });
       showToast("Plan added successfully!", "success");
     }
@@ -210,7 +219,7 @@ const deletePlan = async (uid) => {
   if (!ok) return;
 
   try {
-    await set(ref(database, `membership_plans/${uid}`), null);
+    await set(ref(database, `plans/${uid}`), null);
     showToast("Plan deleted successfully!", "success");
     await fetchPlans();
   } catch (error) {
@@ -251,27 +260,20 @@ function confirmDialog(msg) {
 
 const viewPlan = async (uid) => {
   try {
-    const snap = await get(child(ref(database), `membership_plans/${uid}`));
+    const snap = await get(child(ref(database), `plans/${uid}`));
     if (!snap.exists()) {
       showToast("Plan not found", "error");
       return;
     }
     const p = snap.val();
-    viewContent.innerHTML = `
-             <p><span class="font-semibold">Name:</span> ${p.plan_name}</p>
-             <p><span class="font-semibold">Description:</span> ${
-               p.plan_description
-             }</p>
-             <p><span class="font-semibold">Amount:</span> ₹${p.plan_amount}</p>
-             <p><span class="font-semibold">Includes trainer:</span> ${
-               p.includes_trainer
-             }</p>
-             <p><span class="font-semibold">Trainer duration:</span> ${
-               p.trainer_duration || "-"
-             } month/s</p>
-             <p><span class="font-semibold">Plan duration:</span> ${
-               p.plan_duration
-             } month/s</p>`;
+
+    // Populate view modal
+    viewName.textContent = p.plan_name || "-";
+    viewDescription.textContent = p.description || "-";
+    viewAmount.textContent = p.amount ? `₹${p.amount}` : "-";
+    viewDuration.textContent = p.plan_duration || "-";
+    viewType.textContent = p.plan_type || "-";
+
     show(viewModal);
   } catch (error) {
     showToast("Failed to load plan details", "error");
@@ -281,7 +283,7 @@ const viewPlan = async (uid) => {
 
 const editPlan = async (uid) => {
   try {
-    const snap = await get(child(ref(database), `membership_plans/${uid}`));
+    const snap = await get(child(ref(database), `plans/${uid}`));
     if (!snap.exists()) {
       showToast("Plan not found", "error");
       return;
@@ -292,19 +294,58 @@ const editPlan = async (uid) => {
 
     // fill form
     form["plan-name"].value = p.plan_name;
-    form["plan-description"].value = p.plan_description;
-    form["plan-amount"].value = p.plan_amount;
+    form["plan-description"].value = p.description;
+    form["plan-amount"].value = p.amount;
     form["plan-duration"].value = p.plan_duration;
-
-    trainerChk.checked = p.includes_trainer === "yes";
-    trainerChk.dispatchEvent(new Event("change")); // triggers show/hide
-    trainerSelect.value = p.trainer_duration || "1";
+    form["plan-type"].value = p.plan_type;
 
     show(modal);
   } catch (error) {
     showToast("Failed to load plan for editing", "error");
     console.error("Error editing plan:", error);
   }
+};
+
+/* ---------- form validation ---------- */
+const validateForm = () => {
+  let isValid = true;
+  hideValidationErrors();
+
+  // Validate plan name
+  const name = form["plan-name"].value.trim();
+  if (name.length < 3 || name.length > 50) {
+    show(nameError);
+    isValid = false;
+  }
+
+  // Validate description
+  const desc = form["plan-description"].value.trim();
+  if (desc.length < 10 || desc.length > 500) {
+    show(descError);
+    isValid = false;
+  }
+
+  // Validate amount
+  const amount = parseFloat(form["plan-amount"].value);
+  if (isNaN(amount)) {
+    show(amountError);
+    isValid = false;
+  } else if (amount < 1 || amount > 100000) {
+    show(amountError);
+    isValid = false;
+  }
+
+  // Validate duration
+  if (!form["plan-duration"].value) {
+    isValid = false;
+  }
+
+  // Validate plan type
+  if (!form["plan-type"].value) {
+    isValid = false;
+  }
+
+  return isValid;
 };
 
 /* ---------- listeners ---------- */
@@ -341,14 +382,19 @@ tblBody.onclick = (e) => {
 /* form submit (add / edit) */
 form.onsubmit = async (e) => {
   e.preventDefault();
+
+  if (!validateForm()) {
+    showToast("Please fix the errors in the form", "error");
+    return;
+  }
+
   try {
     const data = {
       plan_name: form["plan-name"].value.trim(),
-      plan_description: form["plan-description"].value.trim(),
-      plan_amount: +form["plan-amount"].value,
-      includes_trainer: trainerChk.checked ? "yes" : "no",
-      trainer_duration: trainerChk.checked ? trainerSelect.value : "",
+      description: form["plan-description"].value.trim(),
+      amount: parseFloat(form["plan-amount"].value),
       plan_duration: form["plan-duration"].value,
+      plan_type: form["plan-type"].value,
     };
 
     await upsertPlan(data);

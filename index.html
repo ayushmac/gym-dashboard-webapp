@@ -3,192 +3,142 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login | Gym App</title>
+    <title>Gym Admin Dashboard</title>
     <link href="./css/output.css" rel="stylesheet" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-   
   </head>
-  <body class="bg-gray-900 text-white min-h-screen dark">
-    <div class="flex justify-center items-center min-h-screen p-4">
-      <div class="bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-md">
-        <h2 class="text-2xl font-bold text-center text-gray-300 mb-6">
-          Gym Management System
-        </h2>
+  <body class="bg-gray-900 text-white min-h-screen">
+    <div class="flex min-h-screen">
+      <!-- Background image for larger screens -->
+      <div
+        class="hidden lg:block lg:w-1/2 bg-[url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center"
+      ></div>
 
-        <!-- Tabs Navigation -->
-        <div class="flex border-b border-gray-700 mb-6">
-          <button
-            id="admin-tab"
-            class="flex-1 py-2 px-4 font-medium text-center border-b-2 border-blue-500 text-blue-400 cursor-pointer transition-colors duration-200"
-            onclick="switchTab('admin')"
-          >
-            <i class="fas fa-user-shield mr-2"></i>Admin
-          </button>
-          <button
-            id="member-tab"
-            class="flex-1 py-2 px-4 font-medium text-center border-b-2 border-transparent text-gray-400 hover:text-gray-300 cursor-pointer transition-colors duration-200"
-            onclick="switchTab('member')"
-          >
-            <i class="fas fa-user mr-2"></i>Member
-          </button>
-          <button
-            id="trainer-tab"
-            class="flex-1 py-2 px-4 font-medium text-center border-b-2 border-transparent text-gray-400 hover:text-gray-300 cursor-pointer transition-colors duration-200"
-            onclick="switchTab('trainer')"
-          >
-            <i class="fas fa-dumbbell mr-2"></i>Trainer
-          </button>
-        </div>
-
-        <!-- Toast Notification Container -->
-        <div id="toast" class="fixed top-4 right-4 z-50 hidden">
-          <div
-            class="bg-gray-800 text-white px-4 py-3 rounded-lg shadow-lg flex items-start max-w-xs border-l-4"
-            id="toast-box"
-          >
-            <i class="fas fa-info-circle mt-1 mr-2" id="toast-icon"></i>
-            <div><p id="toast-message" class="text-sm"></p></div>
-            <button
-              onclick="hideToast()"
-              class="ml-4 text-white hover:text-gray-200 cursor-pointer"
-            >
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Loader -->
+      <!-- Login form container -->
+      <div class="w-full lg:w-1/2 flex items-center justify-center p-6">
         <div
-          id="loader"
-          class="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 z-50 hidden"
+          class="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700"
         >
+          <!-- Logo and title -->
+          <div class="text-center mb-8 p-6">
+            <div
+              class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4"
+            >
+              <i class="fas fa-dumbbell text-white text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-white">Gym Admin Dashboard</h1>
+            <p class="text-gray-400 mt-2">Sign in to your account</p>
+          </div>
+
+          <!-- Toast container -->
           <div
-            class="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"
+            id="toast-container"
+            class="fixed top-5 right-5 z-50 space-y-3"
           ></div>
+
+          <!-- Login form -->
+          <form id="admin-form" class="space-y-6 p-6">
+            <!-- Email field -->
+            <div>
+              <label
+                for="admin-email"
+                class="block text-sm font-medium text-gray-300 mb-4"
+              >
+                Email Address
+              </label>
+              <div class="relative">
+                <div
+                  class="absolute inset-y-0 left-2 pl-3 flex items-center pointer-events-none"
+                >
+                  <i class="fas fa-envelope text-gray-400"></i>
+                </div>
+                <input
+                  type="email"
+                  id="admin-email"
+                  class="w-full pl-10 pr-3 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                  placeholder="admin@example.com"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Password field -->
+            <div>
+              <label
+                for="admin-password"
+                class="block text-sm font-medium text-gray-300 mb-4"
+              >
+                Password
+              </label>
+              <div class="relative">
+                <div
+                  class="absolute inset-y-0 left-2 pl-3 flex items-center pointer-events-none"
+                >
+                  <i class="fas fa-lock text-gray-400"></i>
+                </div>
+                <input
+                  type="password"
+                  id="admin-password"
+                  class="w-full pl-10 pr-10 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  id="toggle-password"
+                  class="absolute inset-y-0 right-0 mr-3 flex items-center text-gray-400 hover:text-gray-300"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Remember me and forgot password -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <input
+                  id="remember-me"
+                  type="checkbox"
+                  class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-600 rounded"
+                />
+                <label
+                  for="remember-me"
+                  class="ml-2 block text-sm text-gray-300"
+                >
+                  Remember me
+                </label>
+              </div>
+              <!-- <a href="#" class="text-sm text-indigo-500 hover:text-indigo-400">
+                Forgot password?
+              </a> -->
+            </div>
+
+            <!-- Submit button -->
+            <button
+              type="submit"
+              class="cursor-pointer w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+            >
+              <i class="fas fa-sign-in-alt mr-2"></i>
+              Sign in
+            </button>
+          </form>
         </div>
+      </div>
+    </div>
 
-        <!-- Admin Login Form -->
-        <form id="admin-form" class="login-form">
-          <div class="mb-4">
-            <label
-              for="admin-email"
-              class="block text-sm font-medium text-gray-400 mb-1"
-              >Email</label
-            >
-            <input
-              type="email"
-              id="admin-email"
-              name="email"
-              class="w-full p-3 border border-gray-700 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              placeholder="admin@example.com"
-              required
-            />
-          </div>
-          <div class="mb-6">
-            <label
-              for="admin-password"
-              class="block text-sm font-medium text-gray-400 mb-1"
-              >Password</label
-            >
-            <input
-              type="password"
-              id="admin-password"
-              name="password"
-              class="w-full p-3 border border-gray-700 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            class="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition cursor-pointer"
-          >
-            Login as Admin
-          </button>
-        </form>
-
-        <!-- Member Login Form -->
-        <form id="member-form" class="login-form hidden">
-          <div class="mb-4">
-            <label
-              for="member-email"
-              class="block text-sm font-medium text-gray-400 mb-1"
-              >Email</label
-            >
-            <input
-              type="email"
-              id="member-email"
-              name="email"
-              class="w-full p-3 border border-gray-700 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              placeholder="member@example.com"
-              required
-            />
-          </div>
-          <div class="mb-6">
-            <label
-              for="member-password"
-              class="block text-sm font-medium text-gray-400 mb-1"
-              >Password</label
-            >
-            <input
-              type="password"
-              id="member-password"
-              name="password"
-              class="w-full p-3 border border-gray-700 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            class="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition cursor-pointer"
-          >
-            Login as Member
-          </button>
-        </form>
-
-        <!-- Trainer Login Form -->
-        <form id="trainer-form" class="login-form hidden">
-          <div class="mb-4">
-            <label
-              for="trainer-email"
-              class="block text-sm font-medium text-gray-400 mb-1"
-              >Email</label
-            >
-            <input
-              type="email"
-              id="trainer-email"
-              name="email"
-              class="w-full p-3 border border-gray-700 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              placeholder="trainer@example.com"
-              required
-            />
-          </div>
-          <div class="mb-6">
-            <label
-              for="trainer-password"
-              class="block text-sm font-medium text-gray-400 mb-1"
-              >Password</label
-            >
-            <input
-              type="password"
-              id="trainer-password"
-              name="password"
-              class="w-full p-3 border border-gray-700 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            class="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition cursor-pointer"
-          >
-            Login as Trainer
-          </button>
-        </form>
+    <!-- Loader overlay -->
+    <div
+      id="loader"
+      class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center"
+    >
+      <div class="flex flex-col items-center">
+        <div
+          class="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"
+        ></div>
+        <p class="mt-4 text-white">Authenticating...</p>
       </div>
     </div>
 

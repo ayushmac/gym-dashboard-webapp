@@ -139,14 +139,88 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updateMemberDropdown() {
+    const memberSelectContainer = document.getElementById(
+      "attendance-member-select-container"
+    );
+    memberSelectContainer.innerHTML = `
+      <div class="relative">
+        <input
+          type="text"
+          id="attendance-member-search"
+          placeholder="Search members..."
+          class="w-full p-2 pl-10 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+        />
+        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+          <i class="fas fa-search"></i>
+        </span>
+      </div>
+      <select
+        id="attendance-member-select"
+        required
+        class="hidden"
+      ></select>
+      <div id="attendance-member-dropdown" class="absolute z-10 w-full mt-1 max-h-60 overflow-auto rounded-lg bg-gray-700 shadow-lg hidden"></div>
+    `;
+
+    const memberSearch = document.getElementById("attendance-member-search");
     const memberSelect = document.getElementById("attendance-member-select");
+    const memberDropdown = document.getElementById(
+      "attendance-member-dropdown"
+    );
+
+    // Clear previous options
     memberSelect.innerHTML = '<option value="">Select a member</option>';
 
+    // Add all members to the hidden select
     allMembers.forEach((member) => {
       const option = document.createElement("option");
       option.value = member.id;
       option.textContent = member.full_name;
+      option.setAttribute("data-name", member.full_name);
       memberSelect.appendChild(option);
+    });
+
+    // Search functionality
+    memberSearch.addEventListener("input", function () {
+      const searchTerm = this.value.toLowerCase();
+      memberDropdown.innerHTML = "";
+
+      if (searchTerm.length === 0) {
+        memberDropdown.classList.add("hidden");
+        return;
+      }
+
+      const filteredMembers = allMembers.filter((member) =>
+        member.full_name.toLowerCase().includes(searchTerm)
+      );
+
+      if (filteredMembers.length === 0) {
+        const noResult = document.createElement("div");
+        noResult.className = "p-2 text-gray-400";
+        noResult.textContent = "No members found";
+        memberDropdown.appendChild(noResult);
+      } else {
+        filteredMembers.forEach((member) => {
+          const memberOption = document.createElement("div");
+          memberOption.className = "p-2 hover:bg-gray-600 cursor-pointer";
+          memberOption.textContent = member.full_name;
+          memberOption.addEventListener("click", function () {
+            memberSearch.value = member.full_name;
+            memberSelect.value = member.id;
+            memberDropdown.classList.add("hidden");
+          });
+          memberDropdown.appendChild(memberOption);
+        });
+      }
+
+      memberDropdown.classList.remove("hidden");
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", function (e) {
+      if (!memberSelectContainer.contains(e.target)) {
+        memberDropdown.classList.add("hidden");
+      }
     });
   }
 
@@ -171,6 +245,8 @@ document.addEventListener("DOMContentLoaded", function () {
       attendanceModalTitle.textContent = "Edit Attendance Record";
       const record = attendanceRecords.find((r) => r.id === recordId);
       if (record) {
+        document.getElementById("attendance-member-search").value =
+          record.member_name;
         document.getElementById("attendance-member-select").value =
           record.member_uid;
         document.getElementById("attendance-status-select").value =
@@ -198,6 +274,16 @@ document.addEventListener("DOMContentLoaded", function () {
     attendanceForm.reset();
   }
 
+  async function checkDuplicateRecord(memberId, date, excludeId = null) {
+    return attendanceRecords.some((record) => {
+      return (
+        record.member_uid === memberId &&
+        record.date_marked === date &&
+        record.id !== excludeId
+      );
+    });
+  }
+
   async function handleFormSubmit(e) {
     e.preventDefault();
 
@@ -219,6 +305,21 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedMember = allMembers.find((m) => m.id === memberSelect.value);
     if (!selectedMember) {
       showToast("Invalid member selected", "error");
+      return;
+    }
+
+    // Check for duplicate record
+    const isDuplicate = await checkDuplicateRecord(
+      memberSelect.value,
+      dateInput.value,
+      isEditing ? currentEditId : null
+    );
+
+    if (isDuplicate) {
+      showToast(
+        "This member already has an attendance record for this date",
+        "error"
+      );
       return;
     }
 

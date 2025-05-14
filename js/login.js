@@ -5,20 +5,9 @@ const adminForm = document.getElementById("admin-form");
 const togglePasswordBtn = document.getElementById("toggle-password");
 const passwordInput = document.getElementById("admin-password");
 const loader = document.getElementById("loader");
-const rememberMe = document.getElementById("remember-me");
 
 // Initialize the page
 document.addEventListener("DOMContentLoaded", () => {
-  // Check for saved credentials if "Remember me" was checked
-  const savedEmail = localStorage.getItem("rememberedEmail");
-  const savedPassword = localStorage.getItem("rememberedPassword");
-
-  if (savedEmail && savedPassword) {
-    document.getElementById("admin-email").value = savedEmail;
-    document.getElementById("admin-password").value = savedPassword;
-    rememberMe.checked = true;
-  }
-
   // Check if already logged in
   if (localStorage.getItem("isAdminAuth") === "true") {
     window.location.href = "/dashboard/admindashboard.html";
@@ -41,17 +30,17 @@ togglePasswordBtn.addEventListener("click", () => {
 const showToast = (message, type = "info") => {
   const toastContainer = document.getElementById("toast-container");
   const toast = document.createElement("div");
-  toast.className = `toast p-4 rounded-lg shadow-lg text-white flex items-center justify-between ${getToastClass(
+  toast.className = `toast p-4 rounded-lg shadow-lg text-white flex items-center justify-between  ${getToastClass(
     type
   )}`;
   toast.innerHTML = `
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-4">
       <i class="${getToastIcon(type)}"></i>
-      <span class="text-sm">${message}</span>
-    </div>
+      <span class="text-sm"> ${message}</span>
+   
     <button class="toast-close ml-4">
       <i class="fas fa-times"></i>
-    </button>
+    </button> </div>
   `;
 
   toastContainer.appendChild(toast);
@@ -113,15 +102,6 @@ adminForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  // Save credentials if "Remember me" is checked
-  if (rememberMe.checked) {
-    localStorage.setItem("rememberedEmail", email);
-    localStorage.setItem("rememberedPassword", password);
-  } else {
-    localStorage.removeItem("rememberedEmail");
-    localStorage.removeItem("rememberedPassword");
-  }
-
   toggleLoader(true);
   await validateAdminLogin(email, password);
 });
@@ -141,14 +121,14 @@ async function validateAdminLogin(email, password) {
           window.location.href = "/dashboard/admindashboard.html";
         }, 1500);
       } else {
-        showToast("Invalid email or password", "error");
+        showToast(" Invalid email or password", "error");
       }
     } else {
-      showToast("Admin credentials not found", "error");
+      showToast(" Admin credentials not found", "error");
     }
   } catch (error) {
     toggleLoader(false);
-    console.error("Login error:", error);
-    showToast("An error occurred. Please try again.", "error");
+    console.error(" Login error:", error);
+    showToast(" An error occurred. Please try again.", "error");
   }
 }

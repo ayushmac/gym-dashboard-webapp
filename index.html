@@ -18,19 +18,23 @@
       ></div>
 
       <!-- Login form container -->
-      <div class="w-full lg:w-1/2 flex items-center justify-center p-6">
+      <div class="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6">
         <div
-          class="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700"
+          class="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 border border-gray-700"
         >
           <!-- Logo and title -->
-          <div class="text-center mb-2 mt-6">
+          <div class="text-center mb-2 mt-4 sm:mt-6">
             <div
-              class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4"
+              class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-indigo-600 rounded-full p-3 mb-4"
             >
-              <i class="fas fa-dumbbell text-white text-2xl"></i>
+              <i class="fas fa-dumbbell text-white text-xl sm:text-2xl"></i>
             </div>
-            <h1 class="text-2xl font-bold text-white">Gym Admin Dashboard</h1>
-            <p class="text-gray-400 mt-2">Sign in to your account</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-white">
+              Gym Admin Dashboard
+            </h1>
+            <p class="text-gray-400 mt-2 text-sm sm:text-base">
+              Sign in to your account
+            </p>
           </div>
 
           <!-- Toast container -->
@@ -40,12 +44,12 @@
           ></div>
 
           <!-- Login form -->
-          <form id="admin-form" class="space-y-4 p-6">
+          <form id="admin-form" class="space-y-4 p-4 sm:p-6">
             <!-- Email field -->
             <div>
               <label
                 for="admin-email"
-                class="block text-sm font-medium text-gray-300 mb-4"
+                class="block text-sm font-medium text-gray-300 mb-2 sm:mb-4"
               >
                 Email Address
               </label>
@@ -58,7 +62,7 @@
                 <input
                   type="email"
                   id="admin-email"
-                  class="w-full pl-10 pr-3 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                  class="w-full pl-10 pr-3 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
                   placeholder="admin@example.com"
                   required
                 />
@@ -69,7 +73,7 @@
             <div>
               <label
                 for="admin-password"
-                class="block text-sm font-medium text-gray-300 mb-4"
+                class="block text-sm font-medium text-gray-300 mb-2 sm:mb-4"
               >
                 Password
               </label>
@@ -82,7 +86,7 @@
                 <input
                   type="password"
                   id="admin-password"
-                  class="w-full pl-10 pr-10 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                  class="w-full pl-10 pr-10 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
                   placeholder="••••••••"
                   required
                 />
@@ -96,30 +100,10 @@
               </div>
             </div>
 
-            <!-- Remember me and forgot password -->
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <input
-                  id="remember-me"
-                  type="checkbox"
-                  class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-600 rounded"
-                />
-                <label
-                  for="remember-me"
-                  class="ml-2 block text-sm text-gray-300"
-                >
-                  Remember me
-                </label>
-              </div>
-              <!-- <a href="#" class="text-sm text-indigo-500 hover:text-indigo-400">
-                Forgot password?
-              </a> -->
-            </div>
-
             <!-- Submit button -->
             <button
               type="submit"
-              class="cursor-pointer w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              class="cursor-pointer w-full flex justify-center items-center py-2 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
             >
               <i class="fas fa-sign-in-alt mr-2"></i>
               Sign in

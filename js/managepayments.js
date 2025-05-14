@@ -11,7 +11,6 @@ import {
 } from "./firebase-config.js";
 
 // Import jsPDF for PDF generation
-
 import "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
 import "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js";
 
@@ -50,8 +49,34 @@ document.addEventListener("DOMContentLoaded", function () {
   const paymentsValidityFilter = document.getElementById(
     "payments-validity-filter"
   );
+  const paymentsPlanTypeFilter = document.getElementById(
+    "payments-plan-type-filter"
+  );
   const paymentsGenerateBillBtn = document.getElementById(
     "payments-generate-bill"
+  );
+
+  // Form elements
+  const paymentsMemberSelect = document.getElementById(
+    "payments-member-select"
+  );
+  const paymentsPlanSelect = document.getElementById("payments-plan-select");
+  const paymentsTrainerSelect = document.getElementById(
+    "payments-trainer-select"
+  );
+  const paymentsTrainerContainer = document.getElementById(
+    "payments-trainer-container"
+  );
+  const paymentsStartDate = document.getElementById("payments-start-date");
+  const paymentsEndDate = document.getElementById("payments-end-date");
+  const paymentsAmountPaid = document.getElementById(
+    "payments-pre-booking-amount"
+  );
+  const paymentsTotalAmount = document.getElementById("payments-total-amount");
+  const paymentsBalanceDue = document.getElementById("payments-balance-due");
+  const paymentsDueStatus = document.getElementById("payments-due-status");
+  const paymentsValidityStatus = document.getElementById(
+    "payments-validity-status"
   );
 
   // State variables
@@ -100,13 +125,18 @@ document.addEventListener("DOMContentLoaded", function () {
       renderPaymentsTable();
     });
 
-    // Status/Validity filter
+    // Filters
     paymentsStatusFilter.addEventListener("change", () => {
       currentPage = 1;
       renderPaymentsTable();
     });
 
     paymentsValidityFilter.addEventListener("change", () => {
+      currentPage = 1;
+      renderPaymentsTable();
+    });
+
+    paymentsPlanTypeFilter.addEventListener("change", () => {
       currentPage = 1;
       renderPaymentsTable();
     });
@@ -129,6 +159,90 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Generate bill
     paymentsGenerateBillBtn.addEventListener("click", generateBillPDF);
+
+    // Member select change
+    paymentsMemberSelect.addEventListener("change", function () {
+      const selectedMember = allMembers.find((m) => m.id === this.value);
+      if (selectedMember) {
+        document.getElementById("payments-member-uid").textContent =
+          selectedMember.id;
+        document
+          .getElementById("payments-member-uid-container")
+          .classList.remove("hidden");
+        document.getElementById("payments-received-from").value =
+          selectedMember.full_name;
+      } else {
+        document
+          .getElementById("payments-member-uid-container")
+          .classList.add("hidden");
+      }
+    });
+
+    // Plan select change
+    paymentsPlanSelect.addEventListener("change", function () {
+      const selectedPlan = allPlans.find((p) => p.id === this.value);
+      if (selectedPlan) {
+        document.getElementById("payments-plan-type").textContent =
+          selectedPlan.plan_type;
+        document
+          .getElementById("payments-plan-type-container")
+          .classList.remove("hidden");
+        paymentsTotalAmount.value = selectedPlan.amount;
+
+        // Show/hide trainer container based on plan type
+        if (selectedPlan.plan_type === "Personal Training Plan") {
+          paymentsTrainerContainer.classList.remove("hidden");
+          paymentsTrainerSelect.required = true;
+        } else {
+          paymentsTrainerContainer.classList.add("hidden");
+          paymentsTrainerSelect.required = false;
+          paymentsTrainerSelect.value = ""; // Clear trainer selection
+          document
+            .getElementById("payments-trainer-uid-container")
+            .classList.add("hidden");
+        }
+
+        // If start date is set, calculate end date
+        if (paymentsStartDate.value) {
+          calculateEndDate(paymentsStartDate.value, selectedPlan.plan_duration);
+        }
+      } else {
+        document
+          .getElementById("payments-plan-type-container")
+          .classList.add("hidden");
+        paymentsTrainerContainer.classList.add("hidden");
+        paymentsTrainerSelect.required = false;
+      }
+    });
+
+    // Trainer select change
+    paymentsTrainerSelect.addEventListener("change", function () {
+      const selectedTrainer = allTrainers.find((t) => t.id === this.value);
+      if (selectedTrainer) {
+        document.getElementById("payments-trainer-uid").textContent =
+          selectedTrainer.id;
+        document
+          .getElementById("payments-trainer-uid-container")
+          .classList.remove("hidden");
+      } else {
+        document
+          .getElementById("payments-trainer-uid-container")
+          .classList.add("hidden");
+      }
+    });
+
+    // Amount paid input change
+    paymentsAmountPaid.addEventListener("input", updateBalanceDue);
+
+    // Start date change (both in add and edit mode)
+    paymentsStartDate.addEventListener("change", function () {
+      const selectedPlan = allPlans.find(
+        (p) => p.id === paymentsPlanSelect.value
+      );
+      if (selectedPlan && this.value) {
+        calculateEndDate(this.value, selectedPlan.plan_duration);
+      }
+    });
   }
 
   function loadMembers() {
@@ -138,10 +252,8 @@ document.addEventListener("DOMContentLoaded", function () {
         ? Object.entries(data).map(([id, member]) => ({ id, ...member }))
         : [];
 
-      // Update member dropdown if modal is open
-      if (!paymentsModal.classList.contains("hidden")) {
-        updateMemberDropdown();
-      }
+      // Update member dropdown
+      updateMemberDropdown();
     });
   }
 
@@ -152,10 +264,8 @@ document.addEventListener("DOMContentLoaded", function () {
         ? Object.entries(data).map(([id, plan]) => ({ id, ...plan }))
         : [];
 
-      // Update plan dropdown if modal is open
-      if (!paymentsModal.classList.contains("hidden")) {
-        updatePlanDropdown();
-      }
+      // Update plan dropdown
+      updatePlanDropdown();
     });
   }
 
@@ -166,320 +276,49 @@ document.addEventListener("DOMContentLoaded", function () {
         ? Object.entries(data).map(([id, trainer]) => ({ id, ...trainer }))
         : [];
 
-      // Update trainer dropdown if modal is open
-      if (!paymentsModal.classList.contains("hidden")) {
-        updateTrainerDropdown();
-      }
+      // Update trainer dropdown
+      updateTrainerDropdown();
     });
   }
 
   function updateMemberDropdown() {
-    const memberSelectContainer = document.getElementById(
-      "payments-member-select-container"
-    );
-    memberSelectContainer.innerHTML = `
-      <div class="relative">
-        <input
-          type="text"
-          id="payments-member-search"
-          placeholder="Search members..."
-          class="w-full p-2 pl-10 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-        />
-        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-          <i class="fas fa-search"></i>
-        </span>
-      </div>
-      <select
-        id="payments-member-select"
-        required
-        class="hidden"
-      ></select>
-      <div id="payments-member-dropdown" class="absolute z-10 w-full mt-1 max-h-60 overflow-auto rounded-lg bg-gray-700 shadow-lg hidden"></div>
-    `;
-
-    const memberSearch = document.getElementById("payments-member-search");
-    const memberSelect = document.getElementById("payments-member-select");
-    const memberDropdown = document.getElementById("payments-member-dropdown");
-
     // Clear previous options
-    memberSelect.innerHTML = '<option value="">Select a member</option>';
+    paymentsMemberSelect.innerHTML =
+      '<option value="">Select a member</option>';
 
-    // Add all members to the hidden select
+    // Add all members to the select
     allMembers.forEach((member) => {
       const option = document.createElement("option");
       option.value = member.id;
       option.textContent = member.full_name;
-      option.setAttribute("data-name", member.full_name);
-      memberSelect.appendChild(option);
-    });
-
-    // Search functionality
-    memberSearch.addEventListener("input", function () {
-      const searchTerm = this.value.toLowerCase();
-      memberDropdown.innerHTML = "";
-
-      if (searchTerm.length === 0) {
-        memberDropdown.classList.add("hidden");
-        return;
-      }
-
-      const filteredMembers = allMembers.filter((member) =>
-        member.full_name.toLowerCase().includes(searchTerm)
-      );
-
-      if (filteredMembers.length === 0) {
-        const noResult = document.createElement("div");
-        noResult.className = "p-2 text-gray-400";
-        noResult.textContent = "No members found";
-        memberDropdown.appendChild(noResult);
-      } else {
-        filteredMembers.forEach((member) => {
-          const memberOption = document.createElement("div");
-          memberOption.className = "p-2 hover:bg-gray-600 cursor-pointer";
-          memberOption.textContent = member.full_name;
-          memberOption.addEventListener("click", function () {
-            memberSearch.value = member.full_name;
-            memberSelect.value = member.id;
-            memberDropdown.classList.add("hidden");
-
-            // Auto-fill received_from with member name
-            document.getElementById("payments-received-from").value =
-              member.full_name;
-          });
-          memberDropdown.appendChild(memberOption);
-        });
-      }
-
-      memberDropdown.classList.remove("hidden");
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener("click", function (e) {
-      if (!memberSelectContainer.contains(e.target)) {
-        memberDropdown.classList.add("hidden");
-      }
+      paymentsMemberSelect.appendChild(option);
     });
   }
 
   function updatePlanDropdown() {
-    const planSelectContainer = document.getElementById(
-      "payments-plan-select-container"
-    );
-    planSelectContainer.innerHTML = `
-      <div class="relative">
-        <input
-          type="text"
-          id="payments-plan-search"
-          placeholder="Search plans..."
-          class="w-full p-2 pl-10 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-        />
-        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-          <i class="fas fa-search"></i>
-        </span>
-      </div>
-      <select
-        id="payments-plan-select"
-        required
-        class="hidden"
-      ></select>
-      <div id="payments-plan-dropdown" class="absolute z-10 w-full mt-1 max-h-60 overflow-auto rounded-lg bg-gray-700 shadow-lg hidden"></div>
-    `;
-
-    const planSearch = document.getElementById("payments-plan-search");
-    const planSelect = document.getElementById("payments-plan-select");
-    const planDropdown = document.getElementById("payments-plan-dropdown");
-
     // Clear previous options
-    planSelect.innerHTML = '<option value="">Select a plan</option>';
+    paymentsPlanSelect.innerHTML = '<option value="">Select a plan</option>';
 
-    // Add all plans to the hidden select
+    // Add all plans to the select
     allPlans.forEach((plan) => {
       const option = document.createElement("option");
       option.value = plan.id;
-      option.textContent = plan.plan_name;
-      option.setAttribute("data-name", plan.plan_name);
-      planSelect.appendChild(option);
-    });
-
-    // Search functionality
-    planSearch.addEventListener("input", function () {
-      const searchTerm = this.value.toLowerCase();
-      planDropdown.innerHTML = "";
-
-      if (searchTerm.length === 0) {
-        planDropdown.classList.add("hidden");
-        return;
-      }
-
-      const filteredPlans = allPlans.filter((plan) =>
-        plan.plan_name.toLowerCase().includes(searchTerm)
-      );
-
-      if (filteredPlans.length === 0) {
-        const noResult = document.createElement("div");
-        noResult.className = "p-2 text-gray-400";
-        noResult.textContent = "No plans found";
-        planDropdown.appendChild(noResult);
-      } else {
-        filteredPlans.forEach((plan) => {
-          const planOption = document.createElement("div");
-          planOption.className = "p-2 hover:bg-gray-600 cursor-pointer";
-          planOption.textContent = plan.plan_name;
-          planOption.addEventListener("click", function () {
-            planSearch.value = plan.plan_name;
-            planSelect.value = plan.id;
-            planDropdown.classList.add("hidden");
-
-            // Update plan details when a plan is selected
-            updatePlanDetails(plan.id);
-          });
-          planDropdown.appendChild(planOption);
-        });
-      }
-
-      planDropdown.classList.remove("hidden");
-    });
-
-    // Plan selection change handler
-    planSelect.addEventListener("change", function () {
-      if (this.value) {
-        updatePlanDetails(this.value);
-      }
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener("click", function (e) {
-      if (!planSelectContainer.contains(e.target)) {
-        planDropdown.classList.add("hidden");
-      }
+      option.textContent = `${plan.plan_name} (${plan.plan_type})`;
+      paymentsPlanSelect.appendChild(option);
     });
   }
 
   function updateTrainerDropdown() {
-    const trainerContainer = document.getElementById(
-      "payments-trainer-select-container"
-    );
-    trainerContainer.innerHTML = `
-      <div class="relative">
-        <input
-          type="text"
-          id="payments-trainer-search"
-          placeholder="Search trainers..."
-          class="w-full p-2 pl-10 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-        />
-        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-          <i class="fas fa-search"></i>
-        </span>
-      </div>
-      <select
-        id="payments-trainer-select"
-        required
-        class="hidden"
-      ></select>
-      <div id="payments-trainer-dropdown" class="absolute z-10 w-full mt-1 max-h-60 overflow-auto rounded-lg bg-gray-700 shadow-lg hidden"></div>
-    `;
-
-    const trainerSearch = document.getElementById("payments-trainer-search");
-    const trainerSelect = document.getElementById("payments-trainer-select");
-    const trainerDropdown = document.getElementById(
-      "payments-trainer-dropdown"
-    );
-
     // Clear previous options
-    trainerSelect.innerHTML = '<option value="">Select a trainer</option>';
+    paymentsTrainerSelect.innerHTML =
+      '<option value="">Select a trainer</option>';
 
-    // Add all trainers to the hidden select
+    // Add all trainers to the select
     allTrainers.forEach((trainer) => {
       const option = document.createElement("option");
       option.value = trainer.id;
       option.textContent = trainer.name;
-      option.setAttribute("data-name", trainer.name);
-      trainerSelect.appendChild(option);
-    });
-
-    // Search functionality
-    trainerSearch.addEventListener("input", function () {
-      const searchTerm = this.value.toLowerCase();
-      trainerDropdown.innerHTML = "";
-
-      if (searchTerm.length === 0) {
-        trainerDropdown.classList.add("hidden");
-        return;
-      }
-
-      const filteredTrainers = allTrainers.filter((trainer) =>
-        trainer.name.toLowerCase().includes(searchTerm)
-      );
-
-      if (filteredTrainers.length === 0) {
-        const noResult = document.createElement("div");
-        noResult.className = "p-2 text-gray-400";
-        noResult.textContent = "No trainers found";
-        trainerDropdown.appendChild(noResult);
-      } else {
-        filteredTrainers.forEach((trainer) => {
-          const trainerOption = document.createElement("div");
-          trainerOption.className = "p-2 hover:bg-gray-600 cursor-pointer";
-          trainerOption.textContent = trainer.name;
-          trainerOption.addEventListener("click", function () {
-            trainerSearch.value = trainer.name;
-            trainerSelect.value = trainer.id;
-            trainerDropdown.classList.add("hidden");
-          });
-          trainerDropdown.appendChild(trainerOption);
-        });
-      }
-
-      trainerDropdown.classList.remove("hidden");
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener("click", function (e) {
-      if (!trainerContainer.contains(e.target)) {
-        trainerDropdown.classList.add("hidden");
-      }
-    });
-  }
-
-  function updatePlanDetails(planId) {
-    const plan = allPlans.find((p) => p.id === planId);
-    if (!plan) return;
-
-    // Update total amount
-    document.getElementById("payments-total-amount").value = plan.amount;
-
-    // Update plan type and show/hide trainer dropdown
-    const trainerContainer = document.getElementById(
-      "payments-trainer-container"
-    );
-    if (plan.plan_type === "Personal Training Plan") {
-      trainerContainer.classList.remove("hidden");
-      updateTrainerDropdown();
-    } else {
-      trainerContainer.classList.add("hidden");
-    }
-
-    // Calculate and update end date based on start date and plan duration
-    const startDateInput = document.getElementById("payments-start-date");
-    const endDateInput = document.getElementById("payments-end-date");
-
-    if (startDateInput.value) {
-      calculateEndDate(startDateInput.value, plan.plan_duration);
-    }
-
-    // Add event listener to start date to recalculate end date when changed
-    startDateInput.addEventListener("change", function () {
-      if (this.value && planId) {
-        calculateEndDate(this.value, plan.plan_duration);
-      }
-    });
-
-    // Update balance due when amount paid changes
-    const amountPaidInput = document.getElementById(
-      "payments-pre-booking-amount"
-    );
-    amountPaidInput.addEventListener("input", function () {
-      updateBalanceDue(plan.amount, this.value);
+      paymentsTrainerSelect.appendChild(option);
     });
   }
 
@@ -504,27 +343,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Format as YYYY-MM-DD
     const endDateStr = end.toISOString().split("T")[0];
-    document.getElementById("payments-end-date").value = endDateStr;
+    paymentsEndDate.value = endDateStr;
 
-    // Update plan validity status
+    // Update plan validity status based on current date
     updateValidityStatus(endDateStr);
   }
 
-  function updateBalanceDue(totalAmount, amountPaid) {
-    const total = parseFloat(totalAmount) || 0;
-    const paid = parseFloat(amountPaid) || 0;
+  function updateBalanceDue() {
+    const total = parseFloat(paymentsTotalAmount.value) || 0;
+    const paid = parseFloat(paymentsAmountPaid.value) || 0;
     const balance = total - paid;
 
-    document.getElementById("payments-balance-due").value = balance.toFixed(2);
-    document.getElementById("payments-due-status").value =
-      balance > 0 ? "due" : "not_due";
+    paymentsBalanceDue.value = balance.toFixed(2);
+    paymentsDueStatus.value = balance > 0 ? "due" : "not_due";
   }
 
   function updateValidityStatus(endDate) {
     const today = new Date();
     const end = new Date(endDate);
     const validityStatus = today <= end ? "active" : "expired";
-    document.getElementById("payments-validity-status").value = validityStatus;
+    paymentsValidityStatus.value = validityStatus;
   }
 
   function loadPaymentRecords() {
@@ -533,6 +371,13 @@ document.addEventListener("DOMContentLoaded", function () {
       paymentRecords = data
         ? Object.entries(data).map(([id, record]) => ({ id, ...record }))
         : [];
+
+      // Update validity status for all records based on current date
+      paymentRecords.forEach((record) => {
+        record.plan_validity_status =
+          new Date(record.end_date) >= new Date() ? "active" : "expired";
+      });
+
       renderPaymentsTable();
     });
   }
@@ -544,16 +389,19 @@ document.addEventListener("DOMContentLoaded", function () {
     // Update dropdowns
     updateMemberDropdown();
     updatePlanDropdown();
+    updateTrainerDropdown();
 
     if (editing && recordId) {
       paymentsModalTitle.textContent = "Edit Payment Record";
       const record = paymentRecords.find((r) => r.id === recordId);
       if (record) {
         // Fill form with record data
-        document.getElementById("payments-member-search").value =
-          record.member_name;
-        document.getElementById("payments-member-select").value =
+        paymentsMemberSelect.value = record.member_uid;
+        document.getElementById("payments-member-uid").textContent =
           record.member_uid;
+        document
+          .getElementById("payments-member-uid-container")
+          .classList.remove("hidden");
         document.getElementById("payments-received-from").value =
           record.received_from;
         document.getElementById("payments-received-by").value =
@@ -561,32 +409,36 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("payments-date-paid").value = record.date_paid;
         document.getElementById("payments-method").value =
           record.payment_method;
-        document.getElementById("payments-plan-search").value =
-          record.plan_name;
-        document.getElementById("payments-plan-select").value = record.plan_uid;
-        document.getElementById("payments-start-date").value =
-          record.start_date;
-        document.getElementById("payments-end-date").value = record.end_date;
-        document.getElementById("payments-total-amount").value =
-          record.total_amount;
-        document.getElementById("payments-pre-booking-amount").value =
-          record.pre_booking_amount;
-        document.getElementById("payments-balance-due").value =
-          record.balance_due;
-        document.getElementById("payments-due-status").value =
-          record.due_status;
-        document.getElementById("payments-validity-status").value =
-          record.plan_validity_status;
+        paymentsPlanSelect.value = record.plan_uid;
+        document.getElementById("payments-plan-type").textContent =
+          record.plan_type;
+        document
+          .getElementById("payments-plan-type-container")
+          .classList.remove("hidden");
+        paymentsStartDate.value = record.start_date;
+        paymentsEndDate.value = record.end_date;
+        paymentsTotalAmount.value = record.total_amount;
+        paymentsAmountPaid.value = record.pre_booking_amount;
+        paymentsBalanceDue.value = record.balance_due;
+        paymentsDueStatus.value = record.due_status;
+        paymentsValidityStatus.value = record.plan_validity_status;
+
+        // Make end date editable in edit mode
+        paymentsEndDate.readOnly = false;
 
         // Show trainer dropdown if plan type is personal training
         if (record.plan_type === "Personal Training Plan") {
-          document
-            .getElementById("payments-trainer-container")
-            .classList.remove("hidden");
-          document.getElementById("payments-trainer-search").value =
-            record.assigned_trainer_name || "";
-          document.getElementById("payments-trainer-select").value =
+          paymentsTrainerContainer.classList.remove("hidden");
+          paymentsTrainerSelect.value = record.assigned_trainer_uid || "";
+          document.getElementById("payments-trainer-uid").textContent =
             record.assigned_trainer_uid || "";
+          document
+            .getElementById("payments-trainer-uid-container")
+            .classList.remove("hidden");
+          paymentsTrainerSelect.required = true;
+        } else {
+          paymentsTrainerContainer.classList.add("hidden");
+          paymentsTrainerSelect.required = false;
         }
       }
     } else {
@@ -597,8 +449,24 @@ document.addEventListener("DOMContentLoaded", function () {
       const today = new Date().toISOString().split("T")[0];
       document.getElementById("payments-date-paid").value = today;
       document.getElementById("payments-method").value = "cash";
-      document.getElementById("payments-due-status").value = "not_due";
-      document.getElementById("payments-validity-status").value = "active";
+      paymentsDueStatus.value = "not_due";
+      paymentsValidityStatus.value = "active";
+
+      // Make end date read-only in add mode
+      paymentsEndDate.readOnly = true;
+
+      // Hide UID containers
+      document
+        .getElementById("payments-member-uid-container")
+        .classList.add("hidden");
+      document
+        .getElementById("payments-plan-type-container")
+        .classList.add("hidden");
+      document
+        .getElementById("payments-trainer-uid-container")
+        .classList.add("hidden");
+      paymentsTrainerContainer.classList.add("hidden");
+      paymentsTrainerSelect.required = false;
     }
 
     paymentsModal.classList.remove("hidden");
@@ -615,12 +483,13 @@ document.addEventListener("DOMContentLoaded", function () {
     memberId,
     planId,
     startDate,
+    planType,
     excludeId = null
   ) {
     return paymentRecords.some((record) => {
       return (
         record.member_uid === memberId &&
-        record.plan_uid === planId &&
+        record.plan_type === planType &&
         record.start_date === startDate &&
         record.id !== excludeId
       );
@@ -644,6 +513,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const dueStatus = document.getElementById("payments-due-status");
     const validityStatus = document.getElementById("payments-validity-status");
     const trainerSelect = document.getElementById("payments-trainer-select");
+    const planType = document.getElementById("payments-plan-type").textContent;
 
     // Validate form
     if (!memberSelect.value) {
@@ -693,17 +563,27 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    // Check for duplicate record (same member, same plan, same start date)
+    // Validate trainer is selected for personal training plan
+    if (
+      selectedPlan.plan_type === "Personal Training Plan" &&
+      !trainerSelect.value
+    ) {
+      showToast("Please select a trainer for personal training plan", "error");
+      return;
+    }
+
+    // Check for duplicate record (same member, same plan type, same start date)
     const isDuplicate = await checkDuplicateRecord(
       memberSelect.value,
       planSelect.value,
       startDate.value,
+      selectedPlan.plan_type,
       isEditing ? currentEditId : null
     );
 
     if (isDuplicate) {
       showToast(
-        "This member already has the same plan starting on this date",
+        "This member already has the same plan type starting on this date",
         "error"
       );
       return;
@@ -777,36 +657,42 @@ document.addEventListener("DOMContentLoaded", function () {
       const recordRef = ref(database, `member_payments/${recordToDelete}`);
       await remove(recordRef);
       showToast("Payment record deleted successfully", "success");
+      recordToDelete = null;
     } catch (error) {
       console.error("Error deleting payment record:", error);
       showToast("Failed to delete payment record", "error");
     }
-
-    recordToDelete = null;
   }
 
   function getFilteredRecords() {
     const searchTerm = paymentsSearchInput.value.toLowerCase();
     const statusFilter = paymentsStatusFilter.value;
     const validityFilter = paymentsValidityFilter.value;
+    const planTypeFilter = paymentsPlanTypeFilter.value;
 
     return paymentRecords.filter((record) => {
       // Search filter
-      const matchesSearch = searchTerm
-        ? record.member_name.toLowerCase().includes(searchTerm)
-        : true;
+      const matchesSearch = record.member_name
+        .toLowerCase()
+        .includes(searchTerm);
 
       // Status filter
-      const matchesStatus = statusFilter
-        ? record.due_status === statusFilter
-        : true;
+      const matchesStatus = !statusFilter || record.due_status === statusFilter;
 
       // Validity filter
-      const matchesValidity = validityFilter
-        ? record.plan_validity_status === validityFilter
-        : true;
+      const matchesValidity =
+        !validityFilter ||
+        (validityFilter === "active"
+          ? new Date(record.end_date) >= new Date()
+          : new Date(record.end_date) < new Date());
 
-      return matchesSearch && matchesStatus && matchesValidity;
+      // Plan type filter
+      const matchesPlanType =
+        !planTypeFilter || record.plan_type === planTypeFilter;
+
+      return (
+        matchesSearch && matchesStatus && matchesValidity && matchesPlanType
+      );
     });
   }
 
@@ -818,90 +704,95 @@ document.addEventListener("DOMContentLoaded", function () {
       startIndex + itemsPerPage
     );
 
+    // Clear previous table content
     paymentsTableBody.innerHTML = "";
 
+    // Show empty message if no records
     if (filteredRecords.length === 0) {
       paymentsEmptyMsg.classList.remove("hidden");
       paymentsTableHead.classList.add("hidden");
       paymentsPagination.classList.add("hidden");
-    } else {
-      paymentsEmptyMsg.classList.add("hidden");
-      paymentsTableHead.classList.remove("hidden");
-      paymentsPagination.classList.remove("hidden");
-
-      paginatedRecords.forEach((record) => {
-        const row = document.createElement("tr");
-        row.className = "border-b border-gray-700 hover:bg-gray-700";
-
-        // Status badge color
-        const dueStatusClass =
-          record.due_status === "due" ? "bg-red-500" : "bg-green-500";
-        const validityStatusClass =
-          record.plan_validity_status === "active"
-            ? "bg-green-500"
-            : "bg-red-500";
-
-        row.innerHTML = `
-          <td class="px-3 py-3">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white">
-                ${record.member_name.charAt(0).toUpperCase()}
-              </div>
-              <span>${record.member_name}</span>
-            </div>
-          </td>
-          <td class="px-3 py-3">
-            <span class="px-2 py-1 rounded-full text-xs ${dueStatusClass}">${
-          record.due_status === "due" ? "Due" : "Not Due"
-        }</span>
-          </td>
-          <td class="px-3 py-3">
-            <span class="px-2 py-1 rounded-full text-xs ${validityStatusClass}">${
-          record.plan_validity_status === "active" ? "Active" : "Expired"
-        }</span>
-          </td>
-          <td class="px-3 py-3">
-            <div class="flex gap-2">
-              <button class="payments-view-btn p-1 text-indigo-400 hover:text-indigo-300" data-id="${
-                record.id
-              }">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="payments-edit-btn p-1 text-blue-400 hover:text-blue-300" data-id="${
-                record.id
-              }">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="payments-delete-btn p-1 text-red-400 hover:text-red-300" data-id="${
-                record.id
-              }">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </td>
-        `;
-        paymentsTableBody.appendChild(row);
-      });
-
-      // Add event listeners to the buttons
-      document.querySelectorAll(".payments-view-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) =>
-          viewRecord(e.target.closest("button").dataset.id)
-        );
-      });
-
-      document.querySelectorAll(".payments-edit-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) =>
-          openPaymentModal(true, e.target.closest("button").dataset.id)
-        );
-      });
-
-      document.querySelectorAll(".payments-delete-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) =>
-          showDeleteConfirmation(e.target.closest("button").dataset.id)
-        );
-      });
+      return;
     }
+
+    paymentsEmptyMsg.classList.add("hidden");
+    paymentsTableHead.classList.remove("hidden");
+    paymentsPagination.classList.remove("hidden");
+
+    // Populate table with records
+    paginatedRecords.forEach((record) => {
+      const row = document.createElement("tr");
+      row.className = "border-b border-gray-700 hover:bg-gray-700";
+      row.innerHTML = `
+        <td class="px-3 py-4 whitespace-nowrap">
+          <div class="flex items-center gap-3">
+            <div>
+              <div class="font-medium text-white">${record.member_name}</div>
+              <div class="text-xs text-gray-400">${record.member_uid}</div>
+            </div>
+          </div>
+        </td>
+        <td class="px-3 py-4 whitespace-nowrap">
+          <span class="px-2 py-1 text-xs rounded-full ${
+            record.due_status === "due"
+              ? "bg-red-500/20 text-red-400"
+              : "bg-green-500/20 text-green-400"
+          }">
+            ${record.due_status === "due" ? "Due" : "Not Due"}
+          </span>
+        </td>
+        <td class="px-3 py-4 whitespace-nowrap">
+          <span class="px-2 py-1 text-xs rounded-full ${
+            record.plan_validity_status === "active"
+              ? "bg-green-500/20 text-green-400"
+              : "bg-red-500/20 text-red-400"
+          }">
+            ${record.plan_validity_status === "active" ? "Active" : "Expired"}
+          </span>
+        </td>
+        <td class="px-3 py-4 whitespace-nowrap text-gray-300">
+          ${record.plan_type}
+        </td>
+        <td class="px-3 py-4 whitespace-nowrap">
+          <div class="flex items-center gap-2">
+            <button 
+              class="view-btn p-1.5 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+              data-id="${record.id}"
+              title="View"
+            >
+              <i class="fas fa-eye"></i>
+            </button>
+            <button 
+              class="edit-btn p-1.5 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30"
+              data-id="${record.id}"
+              title="Edit"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+            <button 
+              class="delete-btn p-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30"
+              data-id="${record.id}"
+              title="Delete"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      `;
+
+      // Add event listeners to buttons
+      row
+        .querySelector(".view-btn")
+        .addEventListener("click", () => viewRecord(record.id));
+      row
+        .querySelector(".edit-btn")
+        .addEventListener("click", () => openPaymentModal(true, record.id));
+      row
+        .querySelector(".delete-btn")
+        .addEventListener("click", () => showDeleteConfirmation(record.id));
+
+      paymentsTableBody.appendChild(row);
+    });
 
     // Update pagination buttons
     paymentsPrevBtn.disabled = currentPage === 1;
@@ -913,153 +804,83 @@ document.addEventListener("DOMContentLoaded", function () {
     const record = paymentRecords.find((r) => r.id === recordId);
     if (!record) return;
 
-    // Format dates for display
-    const formattedDatePaid = record.date_paid
-      ? new Date(record.date_paid).toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      : "--";
-
-    const formattedStartDate = record.start_date
-      ? new Date(record.start_date).toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      : "--";
-
-    const formattedEndDate = record.end_date
-      ? new Date(record.end_date).toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      : "--";
-
-    // Status badge color
-    const dueStatusClass =
-      record.due_status === "due" ? "bg-red-500" : "bg-green-500";
-    const validityStatusClass =
-      record.plan_validity_status === "active" ? "bg-green-500" : "bg-red-500";
-
-    let trainerSection = "";
-    if (record.plan_type === "Personal Training Plan") {
-      trainerSection = `
-        <div>
-          <p class="text-gray-400">Assigned Trainer</p>
-          <p class="font-medium">${record.assigned_trainer_name || "--"}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Trainer ID</p>
-          <p class="font-medium">${record.assigned_trainer_uid || "--"}</p>
-        </div>
-      `;
-    }
-
     paymentsViewContent.innerHTML = `
-      <div class="flex justify-center mb-4">
-        <div class="w-32 h-32 rounded-full bg-indigo-500 flex items-center justify-center text-white text-4xl">
-          ${record.member_name.charAt(0).toUpperCase()}
-        </div>
+      <div class="bg-gray-700/50 p-4 rounded-lg">
+        <h3 class="font-semibold text-white mb-2">Member Information</h3>
+        <p><span class="text-gray-400">Name:</span> ${record.member_name}</p>
+        <p><span class="text-gray-400">Member ID:</span> ${
+          record.member_uid
+        }</p>
       </div>
-      <div class="space-y-4">
-        <div>
-          <p class="text-gray-400">Payment ID</p>
-          <p class="font-medium">${record.id}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Member Name</p>
-          <p class="font-medium">${record.member_name}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Member ID</p>
-          <p class="font-medium">${record.member_uid}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Received From</p>
-          <p class="font-medium">${record.received_from}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Received By</p>
-          <p class="font-medium">${record.received_by}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Date Paid</p>
-          <p class="font-medium">${formattedDatePaid}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Payment Method</p>
-          <p class="font-medium">${
-            record.payment_method.charAt(0).toUpperCase() +
-            record.payment_method.slice(1)
-          }</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Plan Name</p>
-          <p class="font-medium">${record.plan_name}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Plan ID</p>
-          <p class="font-medium">${record.plan_uid}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Plan Type</p>
-          <p class="font-medium">${record.plan_type}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Plan Duration</p>
-          <p class="font-medium">${record.plan_duration}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Start Date</p>
-          <p class="font-medium">${formattedStartDate}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">End Date</p>
-          <p class="font-medium">${formattedEndDate}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Total Amount</p>
-          <p class="font-medium">₹${parseFloat(record.total_amount).toFixed(
-            2
-          )}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Amount Paid</p>
-          <p class="font-medium">₹${parseFloat(
-            record.pre_booking_amount
-          ).toFixed(2)}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Balance Due</p>
-          <p class="font-medium">₹${parseFloat(record.balance_due).toFixed(
-            2
-          )}</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Due Status</p>
-          <p class="font-medium"><span class="px-3 py-1 rounded-full text-sm ${dueStatusClass}">${
-      record.due_status === "due" ? "Due" : "Not Due"
-    }</span></p>
-        </div>
-        <div>
-          <p class="text-gray-400">Plan Validity Status</p>
-          <p class="font-medium"><span class="px-3 py-1 rounded-full text-sm ${validityStatusClass}">${
-      record.plan_validity_status === "active" ? "Active" : "Expired"
-    }</span></p>
-        </div>
-        ${trainerSection}
+      
+      <div class="bg-gray-700/50 p-4 rounded-lg">
+        <h3 class="font-semibold text-white mb-2">Payment Details</h3>
+        <p><span class="text-gray-400">Received From:</span> ${
+          record.received_from
+        }</p>
+        <p><span class="text-gray-400">Received By:</span> ${
+          record.received_by
+        }</p>
+        <p><span class="text-gray-400">Date Paid:</span> ${record.date_paid}</p>
+        <p><span class="text-gray-400">Payment Method:</span> ${
+          record.payment_method
+        }</p>
+        <p><span class="text-gray-400">Amount Paid:</span> ₹${
+          record.pre_booking_amount
+        }</p>
+        <p><span class="text-gray-400">Balance Due:</span> ₹${
+          record.balance_due
+        }</p>
+        <p><span class="text-gray-400">Due Status:</span> 
+          <span class="${
+            record.due_status === "due" ? "text-red-400" : "text-green-400"
+          }">
+            ${record.due_status === "due" ? "Due" : "Not Due"}
+          </span>
+        </p>
       </div>
+      
+      <div class="bg-gray-700/50 p-4 rounded-lg">
+        <h3 class="font-semibold text-white mb-2">Plan Information</h3>
+        <p><span class="text-gray-400">Plan Name:</span> ${record.plan_name}</p>
+        <p><span class="text-gray-400">Plan Type:</span> ${record.plan_type}</p>
+        <p><span class="text-gray-400">Plan Duration:</span> ${
+          record.plan_duration
+        }</p>
+        <p><span class="text-gray-400">Start Date:</span> ${
+          record.start_date
+        }</p>
+        <p><span class="text-gray-400">End Date:</span> ${record.end_date}</p>
+        <p><span class="text-gray-400">Total Amount:</span> ₹${
+          record.total_amount
+        }</p>
+        <p><span class="text-gray-400">Validity Status:</span> 
+          <span class="${
+            record.plan_validity_status === "active"
+              ? "text-green-400"
+              : "text-red-400"
+          }">
+            ${record.plan_validity_status === "active" ? "Active" : "Expired"}
+          </span>
+        </p>
+      </div>
+      
+      ${
+        record.plan_type === "Personal Training Plan" &&
+        record.assigned_trainer_name
+          ? `
+      <div class="bg-gray-700/50 p-4 rounded-lg">
+        <h3 class="font-semibold text-white mb-2">Trainer Information</h3>
+        <p><span class="text-gray-400">Trainer Name:</span> ${record.assigned_trainer_name}</p>
+        <p><span class="text-gray-400">Trainer ID:</span> ${record.assigned_trainer_uid}</p>
+      </div>
+      `
+          : ""
+      }
     `;
 
-    // Set the record ID for the generate bill button
+    // Store record ID for PDF generation
     paymentsGenerateBillBtn.dataset.id = recordId;
-
     paymentsViewModal.classList.remove("hidden");
   }
 
@@ -1068,181 +889,71 @@ document.addEventListener("DOMContentLoaded", function () {
     const record = paymentRecords.find((r) => r.id === recordId);
     if (!record) return;
 
-    // Access jsPDF from the global namespace
+    // Use jsPDF to generate PDF
     const { jsPDF } = window.jspdf;
-
-    // Create a new PDF document
     const doc = new jsPDF();
 
-    // Add logo or header
+    // Add logo and header
     doc.setFontSize(20);
     doc.setTextColor(40, 40, 40);
-    doc.setFont("helvetica", "bold");
     doc.text("GYM MANAGEMENT SYSTEM", 105, 20, { align: "center" });
+    doc.setFontSize(16);
+    doc.text("PAYMENT RECEIPT", 105, 30, { align: "center" });
 
-    doc.setFontSize(14);
-    doc.setTextColor(100, 100, 100);
-    doc.setFont("helvetica", "normal");
-    doc.text("Payment Receipt", 105, 30, { align: "center" });
-
-    // Add line separator
-    doc.setDrawColor(200, 200, 200);
-    doc.line(20, 35, 190, 35);
-
-    // Bill information
+    // Add receipt details
     doc.setFontSize(10);
-    doc.setTextColor(40, 40, 40);
-    doc.text(`Receipt No: ${record.id}`, 20, 45);
-    doc.text(
-      `Date: ${new Date(record.date_paid).toLocaleDateString()}`,
-      160,
-      45
-    );
+    doc.text(`Receipt No: ${record.id}`, 15, 45);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 15, 50);
 
-    // Member information
+    // Add member details
     doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("Member Information:", 20, 60);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Name: ${record.member_name}`, 20, 70);
-    doc.text(`Member ID: ${record.member_uid}`, 20, 80);
-
-    // Define the Rupee symbol correctly (UTF-8)
-    const rupeeSymbol = "Rs.";
-
-    // Payment details
-    doc.setFont("helvetica", "bold");
-    doc.text("Payment Details:", 20, 100);
-    doc.setFont("helvetica", "normal");
-
-    // Create payment details table with correct Rupee symbol
-    const paymentData = [
-      ["Plan Name", record.plan_name],
-      ["Plan Type", record.plan_type],
-      ["Plan Duration", record.plan_duration],
-      ["Start Date", new Date(record.start_date).toLocaleDateString()],
-      ["End Date", new Date(record.end_date).toLocaleDateString()],
-      [
-        "Payment Method",
-        record.payment_method.charAt(0).toUpperCase() +
-          record.payment_method.slice(1),
-      ],
-      [
-        "Total Amount",
-        `${rupeeSymbol}${parseFloat(record.total_amount).toFixed(2)}`,
-      ],
-      [
-        "Amount Paid",
-        `${rupeeSymbol}${parseFloat(record.pre_booking_amount).toFixed(2)}`,
-      ],
-      [
-        "Balance Due",
-        `${rupeeSymbol}${parseFloat(record.balance_due).toFixed(2)}`,
-      ],
-      ["Due Status", record.due_status === "due" ? "Due" : "Paid in Full"],
-      [
-        "Plan Status",
-        record.plan_validity_status === "active" ? "Active" : "Expired",
-      ],
-    ];
-
-    // Include trainer info if applicable
-    if (
-      record.plan_type === "Personal Training Plan" &&
-      record.assigned_trainer_name
-    ) {
-      paymentData.splice(2, 0, [
-        "Assigned Trainer",
-        record.assigned_trainer_name,
-      ]);
-    }
-
-    // Generate the AutoTable
-    doc.autoTable({
-      startY: 105,
-      head: [["Description", "Value"]],
-      body: paymentData,
-      margin: { left: 20 },
-      styles: { fontSize: 10, cellPadding: 5 },
-      headStyles: { fillColor: [70, 130, 180], textColor: 255 },
-      columnStyles: { 0: { fontStyle: "bold" } },
-    });
-
-    // Footer
+    doc.text("Member Details:", 15, 65);
     doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(
-      "Thank you for your payment!",
-      105,
-      doc.lastAutoTable.finalY + 15,
-      { align: "center" }
-    );
-    doc.text(
-      "This is a computer-generated receipt and does not require a signature.",
-      105,
-      doc.lastAutoTable.finalY + 25,
-      { align: "center" }
-    );
+    doc.text(`Name: ${record.member_name}`, 15, 70);
+    doc.text(`Member ID: ${record.member_uid}`, 15, 75);
+
+    // Add payment details
+    doc.setFontSize(12);
+    doc.text("Payment Details:", 15, 90);
+    doc.setFontSize(10);
+    doc.text(`Plan Name: ${record.plan_name}`, 15, 95);
+    doc.text(`Plan Type: ${record.plan_type}`, 15, 100);
+    doc.text(`Start Date: ${record.start_date}`, 15, 105);
+    doc.text(`End Date: ${record.end_date}`, 15, 110);
+    doc.text(`Payment Method: ${record.payment_method}`, 15, 115);
+    doc.text(`Amount Paid: ₹${record.pre_booking_amount}`, 15, 120);
+    doc.text(`Balance Due: ₹${record.balance_due}`, 15, 125);
+
+    // Add total and signature
+    doc.setFontSize(12);
+    doc.text("Total Amount: ₹" + record.total_amount, 15, 140);
+    doc.text("___________________", 140, 160);
+    doc.text("Authorized Signature", 140, 165);
 
     // Save the PDF
     doc.save(`Payment_Receipt_${record.id}.pdf`);
   }
 
-  function showToast(message, type = "info") {
+  function showToast(message, type) {
     const toast = document.createElement("div");
-    toast.className = `toast p-4 rounded-lg shadow-lg text-white flex items-center justify-between ${getToastClass(
-      type
-    )}`;
+    toast.className = `px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 ${
+      type === "success"
+        ? "bg-green-500/90 text-white"
+        : "bg-red-500/90 text-white"
+    }`;
     toast.innerHTML = `
-      <div class="flex items-center gap-3">
-        <i class="${getToastIcon(type)}"></i>
-        <span>${message}</span>
-      </div>
-      <button class="toast-close ml-4">
-        <i class="fas fa-times"></i>
-      </button>
+      <i class="fas ${
+        type === "success" ? "fa-check-circle" : "fa-exclamation-circle"
+      }"></i>
+      <span>${message}</span>
     `;
 
     paymentsToastContainer.appendChild(toast);
 
+    // Remove toast after 3 seconds
     setTimeout(() => {
       toast.classList.add("opacity-0", "transition-opacity", "duration-300");
       setTimeout(() => toast.remove(), 300);
-    }, 5000);
-
-    toast.querySelector(".toast-close").addEventListener("click", () => {
-      toast.classList.add("opacity-0", "transition-opacity", "duration-300");
-      setTimeout(() => toast.remove(), 300);
-    });
-  }
-
-  function getToastClass(type) {
-    switch (type) {
-      case "success":
-        return "bg-green-600";
-      case "error":
-        return "bg-red-600";
-      case "warning":
-        return "bg-yellow-600";
-      case "info":
-        return "bg-blue-600";
-      default:
-        return "bg-gray-600";
-    }
-  }
-
-  function getToastIcon(type) {
-    switch (type) {
-      case "success":
-        return "fas fa-check-circle";
-      case "error":
-        return "fas fa-exclamation-circle";
-      case "warning":
-        return "fas fa-exclamation-triangle";
-      case "info":
-        return "fas fa-info-circle";
-      default:
-        return "fas fa-bell";
-    }
+    }, 3000);
   }
 });

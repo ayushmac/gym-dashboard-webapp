@@ -1826,27 +1826,39 @@
 
             <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
               <!-- Search + Filters + Add -->
-              <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-                <div class="relative flex-1">
-                  <div class="relative">
-                    <input
-                      id="payments-search-input"
-                      type="text"
-                      placeholder="Search by member name..."
-                      class="w-full p-2 pl-10 rounded-lg bg-gray-700 text-white placeholder-gray-400"
-                    />
-                    <span
-                      class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    >
-                      <i class="fas fa-search"></i>
-                    </span>
+              <div class="flex flex-col gap-4 mb-6">
+                <!-- Top Row - Search and Add Button -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                  <div class="relative flex-1 min-w-0">
+                    <div class="relative">
+                      <input
+                        id="payments-search-input"
+                        type="text"
+                        placeholder="Search by member name..."
+                        class="w-full p-2 pl-10 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+                      />
+                      <span
+                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      >
+                        <i class="fas fa-search"></i>
+                      </span>
+                    </div>
                   </div>
+
+                  <button
+                    id="payments-add-btn"
+                    class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 whitespace-nowrap sm:w-auto w-full"
+                  >
+                    <i class="fas fa-plus"></i>
+                    <span class="sm:block hidden">Add Payment</span>
+                  </button>
                 </div>
 
-                <div class="flex gap-2">
+                <!-- Bottom Row - Filters -->
+                <div class="flex flex-wrap gap-2">
                   <select
                     id="payments-status-filter"
-                    class="p-2 rounded-lg bg-gray-700 text-white"
+                    class="p-2 rounded-lg bg-gray-700 text-white flex-1 min-w-[150px]"
                   >
                     <option value="">All Status</option>
                     <option value="due">Due</option>
@@ -1854,20 +1866,23 @@
                   </select>
                   <select
                     id="payments-validity-filter"
-                    class="p-2 rounded-lg bg-gray-700 text-white"
+                    class="p-2 rounded-lg bg-gray-700 text-white flex-1 min-w-[150px]"
                   >
                     <option value="">All Plans</option>
                     <option value="active">Active</option>
                     <option value="expired">Expired</option>
                   </select>
+                  <select
+                    id="payments-plan-type-filter"
+                    class="p-2 rounded-lg bg-gray-700 text-white flex-1 min-w-[150px]"
+                  >
+                    <option value="">All Plan Types</option>
+                    <option value="Membership Plan">Membership Plan</option>
+                    <option value="Personal Training Plan">
+                      Personal Training Plan
+                    </option>
+                  </select>
                 </div>
-
-                <button
-                  id="payments-add-btn"
-                  class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap text-center"
-                >
-                  <i class="fas fa-plus"></i> Add Payment
-                </button>
               </div>
 
               <!-- Payments table -->
@@ -1881,6 +1896,7 @@
                       <th class="px-3 py-2">Name</th>
                       <th class="px-3 py-2">Due Status</th>
                       <th class="px-3 py-2">Plan Status</th>
+                      <th class="px-3 py-2">Plan Type</th>
                       <th class="px-3 py-2">Actions</th>
                     </tr>
                   </thead>
@@ -1939,8 +1955,18 @@
                     <label class="block mb-1 text-sm text-gray-300">
                       Member <span class="text-red-500">*</span>
                     </label>
-                    <div id="payments-member-select-container" class="relative">
-                      <!-- Searchable dropdown will be inserted here by JS -->
+                    <select
+                      id="payments-member-select"
+                      required
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white"
+                    >
+                      <option value="">Select a member</option>
+                    </select>
+                    <div
+                      id="payments-member-uid-container"
+                      class="text-xs text-gray-400 mt-1 hidden"
+                    >
+                      Member ID: <span id="payments-member-uid"></span>
                     </div>
                   </div>
 
@@ -2015,8 +2041,18 @@
                     <label class="block mb-1 text-sm text-gray-300">
                       Plan <span class="text-red-500">*</span>
                     </label>
-                    <div id="payments-plan-select-container" class="relative">
-                      <!-- Searchable dropdown will be inserted here by JS -->
+                    <select
+                      id="payments-plan-select"
+                      required
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white"
+                    >
+                      <option value="">Select a plan</option>
+                    </select>
+                    <div
+                      id="payments-plan-type-container"
+                      class="text-xs text-gray-400 mt-1 hidden"
+                    >
+                      Plan Type: <span id="payments-plan-type"></span>
                     </div>
                   </div>
 
@@ -2047,7 +2083,6 @@
                     <input
                       id="payments-end-date"
                       type="date"
-                      readonly
                       class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
                     />
                   </div>
@@ -2137,11 +2172,17 @@
                     <label class="block mb-1 text-sm text-gray-300">
                       Assigned Trainer <span class="text-red-500">*</span>
                     </label>
-                    <div
-                      id="payments-trainer-select-container"
-                      class="relative"
+                    <select
+                      id="payments-trainer-select"
+                      class="w-full p-2 rounded-lg bg-gray-700 text-white"
                     >
-                      <!-- Searchable dropdown will be inserted here by JS -->
+                      <option value="">Select a trainer</option>
+                    </select>
+                    <div
+                      id="payments-trainer-uid-container"
+                      class="text-xs text-gray-400 mt-1 hidden"
+                    >
+                      Trainer ID: <span id="payments-trainer-uid"></span>
                     </div>
                   </div>
 

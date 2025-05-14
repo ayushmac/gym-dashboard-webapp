@@ -63,9 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Delete confirmation modal
     confirmDeleteBtn.addEventListener("click", confirmDelete);
-    cancelDeleteBtn.addEventListener("click", () =>
-      confirmDeleteModal.classList.add("hidden")
-    );
+    cancelDeleteBtn.addEventListener("click", closeDeleteModal);
 
     // Form submission
     addTrainerForm.addEventListener("submit", handleFormSubmit);
@@ -307,6 +305,8 @@ document.addEventListener("DOMContentLoaded", function () {
         ? Object.entries(data).map(([id, trainer]) => ({ id, ...trainer }))
         : [];
       renderTrainersTable();
+      // Ensure delete modal is hidden when data reloads
+      closeDeleteModal();
     });
   }
 
@@ -370,6 +370,11 @@ document.addEventListener("DOMContentLoaded", function () {
       .forEach((el) => el.classList.add("hidden"));
   }
 
+  function closeDeleteModal() {
+    confirmDeleteModal.classList.add("hidden");
+    trainerToDelete = null;
+  }
+
   async function handleFormSubmit(e) {
     e.preventDefault();
 
@@ -422,8 +427,6 @@ document.addEventListener("DOMContentLoaded", function () {
   async function confirmDelete() {
     if (!trainerToDelete) return;
 
-    confirmDeleteModal.classList.add("hidden");
-
     try {
       const trainerRef = ref(database, `trainers/${trainerToDelete}`);
       await remove(trainerRef);
@@ -433,7 +436,7 @@ document.addEventListener("DOMContentLoaded", function () {
       showToast("Failed to delete trainer", "error");
     }
 
-    trainerToDelete = null;
+    closeDeleteModal();
   }
 
   function getFilteredTrainers() {

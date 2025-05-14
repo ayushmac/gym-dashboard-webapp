@@ -62,9 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Delete confirmation
     staffConfirmDeleteBtn.addEventListener("click", confirmDelete);
-    staffCancelDeleteBtn.addEventListener("click", () =>
-      staffConfirmDeleteModal.classList.add("hidden")
-    );
+    staffCancelDeleteBtn.addEventListener("click", () => closeDeleteModal());
 
     // Form submission
     staffForm.addEventListener("submit", handleFormSubmit);
@@ -231,6 +229,8 @@ document.addEventListener("DOMContentLoaded", function () {
         ? Object.entries(data).map(([id, staff]) => ({ id, ...staff }))
         : [];
       renderStaffTable();
+      // Ensure delete modal is hidden when data reloads
+      closeDeleteModal();
     });
   }
 
@@ -277,6 +277,11 @@ document.addEventListener("DOMContentLoaded", function () {
     document
       .querySelectorAll('[id$="-error"]')
       .forEach((el) => el.classList.add("hidden"));
+  }
+
+  function closeDeleteModal() {
+    staffConfirmDeleteModal.classList.add("hidden");
+    staffToDelete = null;
   }
 
   async function handleFormSubmit(e) {
@@ -336,8 +341,7 @@ document.addEventListener("DOMContentLoaded", function () {
       showToast("Failed to delete staff", "error");
     }
 
-    staffConfirmDeleteModal.classList.add("hidden");
-    staffToDelete = null;
+    closeDeleteModal();
   }
 
   function getFilteredStaff() {

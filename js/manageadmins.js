@@ -6,6 +6,7 @@ import {
   onValue,
   remove,
   update,
+  get,
 } from "./firebase-config.js";
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -94,6 +95,12 @@ document.addEventListener("DOMContentLoaded", function () {
     document
       .getElementById("admins-phone")
       .addEventListener("input", validatePhone);
+    document
+      .getElementById("admins-username")
+      .addEventListener("blur", checkUsernameExists);
+    document
+      .getElementById("admins-password")
+      .addEventListener("blur", checkPasswordExists);
     document
       .getElementById("admins-username")
       .addEventListener("input", validateUsername);
@@ -193,6 +200,76 @@ document.addEventListener("DOMContentLoaded", function () {
     return isValid;
   }
 
+  async function checkUsernameExists() {
+    const usernameInput = document.getElementById("admins-username");
+    const username = usernameInput.value.trim();
+    const error = document.getElementById("admins-username-exists-error");
+
+    if (!username || username.length < 4) return false;
+
+    // Skip check if we're editing the same admin
+    if (isEditing && currentEditId) {
+      const currentAdmin = admins.find((a) => a.id === currentEditId);
+      if (currentAdmin && currentAdmin.username === username) {
+        error.classList.add("hidden");
+        return false;
+      }
+    }
+
+    const exists = await checkFieldExists("username", username);
+
+    if (exists) {
+      error.classList.remove("hidden");
+      usernameInput.classList.add("border-red-500");
+      return true;
+    } else {
+      error.classList.add("hidden");
+      usernameInput.classList.remove("border-red-500");
+      return false;
+    }
+  }
+
+  async function checkPasswordExists() {
+    const passwordInput = document.getElementById("admins-password");
+    const password = passwordInput.value;
+    const error = document.getElementById("admins-password-exists-error");
+
+    if (!password || password.length < 6) return false;
+
+    // Skip check if we're editing the same admin
+    if (isEditing && currentEditId) {
+      const currentAdmin = admins.find((a) => a.id === currentEditId);
+      if (currentAdmin && currentAdmin.password === password) {
+        error.classList.add("hidden");
+        return false;
+      }
+    }
+
+    const exists = await checkFieldExists("password", password);
+
+    if (exists) {
+      error.classList.remove("hidden");
+      passwordInput.classList.add("border-red-500");
+      return true;
+    } else {
+      error.classList.add("hidden");
+      passwordInput.classList.remove("border-red-500");
+      return false;
+    }
+  }
+
+  async function checkFieldExists(field, value) {
+    if (!admins.length) return false;
+
+    return admins.some((admin) => {
+      // Skip the current admin being edited
+      if (isEditing && currentEditId && admin.id === currentEditId) {
+        return false;
+      }
+      return admin[field] === value;
+    });
+  }
+
   function validateForm() {
     let isValid = true;
 
@@ -203,6 +280,16 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!validatePassword()) isValid = false;
 
     return isValid;
+  }
+
+  async function validateBeforeSubmit() {
+    const basicValidation = validateForm();
+    if (!basicValidation) return false;
+
+    const usernameExists = await checkUsernameExists();
+    const passwordExists = await checkPasswordExists();
+
+    return !usernameExists && !passwordExists;
   }
 
   function loadAdmins() {
@@ -261,7 +348,8 @@ document.addEventListener("DOMContentLoaded", function () {
   async function handleFormSubmit(e) {
     e.preventDefault();
 
-    if (!validateForm()) {
+    const isValid = await validateBeforeSubmit();
+    if (!isValid) {
       showToast("Please fix the form errors before submitting", "error");
       return;
     }
@@ -350,44 +438,44 @@ document.addEventListener("DOMContentLoaded", function () {
         const row = document.createElement("tr");
         row.className = "border-b border-gray-700 hover:bg-gray-700";
         row.innerHTML = `
-                    <td class="px-3 py-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white">
-                                ${admin.name.charAt(0).toUpperCase()}
-                            </div>
-                            <span>${admin.name}</span>
-                        </div>
-                    </td>
-                    <td class="px-3 py-3">${admin.email}</td>
-                    <td class="px-3 py-3">${admin.phone}</td>
-                    <td class="px-3 py-3">${admin.username}</td>
-                    <td class="px-3 py-3">
-                        <div class="flex items-center gap-2">
-                            <span class="password-display">${"•".repeat(
-                              admin.password.length
-                            )}</span>
-                            <button class="toggle-password-btn text-indigo-400 hover:text-indigo-300" data-password="${
-                              admin.password
-                            }">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </td>
-                    <td class="px-3 py-3">
-                        <div class="flex gap-2">
-                            <button class="edit-btn p-1 text-blue-400 hover:text-blue-300" data-id="${
-                              admin.id
-                            }">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="delete-btn p-1 text-red-400 hover:text-red-300" data-id="${
-                              admin.id
-                            }">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
+          <td class="px-3 py-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white">
+                ${admin.name.charAt(0).toUpperCase()}
+              </div>
+              <span>${admin.name}</span>
+            </div>
+          </td>
+          <td class="px-3 py-3">${admin.email}</td>
+          <td class="px-3 py-3">${admin.phone}</td>
+          <td class="px-3 py-3">${admin.username}</td>
+          <td class="px-3 py-3">
+            <div class="flex items-center gap-2">
+              <span class="password-display">${"•".repeat(
+                admin.password.length
+              )}</span>
+              <button class="toggle-password-btn text-indigo-400 hover:text-indigo-300" data-password="${
+                admin.password
+              }">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </td>
+          <td class="px-3 py-3">
+            <div class="flex gap-2">
+              <button class="edit-btn p-1 text-blue-400 hover:text-blue-300" data-id="${
+                admin.id
+              }">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="delete-btn p-1 text-red-400 hover:text-red-300" data-id="${
+                admin.id
+              }">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        `;
         adminsTableBody.appendChild(row);
       });
 
@@ -438,22 +526,22 @@ document.addEventListener("DOMContentLoaded", function () {
         : "bg-blue-600"
     }`;
     toast.innerHTML = `
-            <div class="flex items-center gap-3">
-                <i class="${
-                  type === "success"
-                    ? "fas fa-check-circle"
-                    : type === "error"
-                    ? "fas fa-exclamation-circle"
-                    : type === "warning"
-                    ? "fas fa-exclamation-triangle"
-                    : "fas fa-info-circle"
-                }"></i>
-                <span>${message}</span>
-            </div>
-            <button class="toast-close ml-4">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
+      <div class="flex items-center gap-3">
+        <i class="${
+          type === "success"
+            ? "fas fa-check-circle"
+            : type === "error"
+            ? "fas fa-exclamation-circle"
+            : type === "warning"
+            ? "fas fa-exclamation-triangle"
+            : "fas fa-info-circle"
+        }"></i>
+        <span>${message}</span>
+      </div>
+      <button class="toast-close ml-4">
+        <i class="fas fa-times"></i>
+      </button>
+    `;
 
     toastContainer.appendChild(toast);
 

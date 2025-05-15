@@ -2,59 +2,57 @@ import { database, ref, onValue } from "./firebase-config.js";
 
 // Database references
 const membersRef = ref(database, "members");
-const trainersRef = ref(database, "trainers");
+const trainersRef = ref(database, "trainers"); // Note: Check if this should be "trainers" or "trainers"
 const staffRef = ref(database, "staff");
 const plansRef = ref(database, "plans");
 const paymentsRef = ref(database, "member_payments");
 
 // Initialize the stats dashboard
 function initDashboard() {
-  // Members count
-  onValue(
-    membersRef,
-    (snapshot) => {
-      const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-      document.getElementById("stat-total-members").textContent = count;
-    },
-    { onlyOnce: false }
-  );
+  // Set initial loading state
+  showLoadingState();
 
-  // Trainers count
-  onValue(
-    trainersRef,
-    (snapshot) => {
-      const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-      document.getElementById("stat-total-trainers").textContent = count;
-    },
-    { onlyOnce: false }
-  );
+  // Members count
+  setupCounter(membersRef, "stat-total-members");
+
+  // Trainers count (note the spelling - make sure it matches your Firebase structure)
+  setupCounter(trainersRef, "stat-total-trainers");
 
   // Staff count
-  onValue(
-    staffRef,
-    (snapshot) => {
-      const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-      document.getElementById("stat-total-staff").textContent = count;
-    },
-    { onlyOnce: false }
-  );
+  setupCounter(staffRef, "stat-total-staff");
 
   // Plans count
-  onValue(
-    plansRef,
-    (snapshot) => {
-      const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-      document.getElementById("stat-total-plans").textContent = count;
-    },
-    { onlyOnce: false }
-  );
+  setupCounter(plansRef, "stat-total-plans");
 
   // Payment stats
+  setupPaymentStats();
+}
+
+// Generic counter setup function
+function setupCounter(dbRef, elementId) {
+  onValue(
+    dbRef,
+    (snapshot) => {
+      const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+      updateElement(elementId, count);
+    },
+    {
+      onlyOnce: false,
+      onError: (error) => {
+        console.error(`Error reading ${elementId}:`, error);
+        updateElement(elementId, "--");
+      },
+    }
+  );
+}
+
+// Payment statistics setup
+function setupPaymentStats() {
   onValue(
     paymentsRef,
     (snapshot) => {
       if (!snapshot.exists()) {
-        showErrorState();
+        updatePaymentStats(0, 0, 0, 0);
         return;
       }
 
@@ -64,12 +62,10 @@ function initDashboard() {
       let activePlans = 0;
       let expiredPlans = 0;
 
-      Object.keys(paymentsData).forEach((paymentId) => {
-        const payment = paymentsData[paymentId];
-
-        // Calculate total revenue (sum of pre_booking_amount)
+      Object.values(paymentsData).forEach((payment) => {
+        // Calculate total revenue
         if (payment.pre_booking_amount) {
-          totalRevenue += parseFloat(payment.pre_booking_amount);
+          totalRevenue += parseFloat(payment.pre_booking_amount) || 0;
         }
 
         // Check for dues
@@ -85,28 +81,52 @@ function initDashboard() {
         }
       });
 
-      // Update the DOM
-      document.getElementById(
-        "stat-total-revenue"
-      ).textContent = `₹${totalRevenue.toFixed(2)}`;
-      document.getElementById("stat-total-dues").textContent = membersWithDues;
-      document.getElementById("stat-active-plans").textContent = activePlans;
-      document.getElementById("stat-expired-plans").textContent = expiredPlans;
+      updatePaymentStats(
+        totalRevenue,
+        membersWithDues,
+        activePlans,
+        expiredPlans
+      );
     },
-    { onlyOnce: false }
+    {
+      onlyOnce: false,
+      onError: (error) => {
+        console.error("Error reading payment stats:", error);
+        updatePaymentStats("--", "--", "--", "--");
+      },
+    }
   );
+}
+
+// Helper functions
+function updateElement(id, value) {
+  const element = document.getElementById(id);
+  if (element) {
+    element.textContent =
+      id === "stat-total-revenue" && typeof value === "number"
+        ? `₹${value.toFixed(2)}`
+        : value;
+  }
+}
+
+function updatePaymentStats(revenue, dues, active, expired) {
+  updateElement("stat-total-revenue", revenue);
+  updateElement("stat-total-dues", dues);
+  updateElement("stat-active-plans", active);
+  updateElement("stat-expired-plans", expired);
+}
+
+function showLoadingState() {
+  document.querySelectorAll('[id^="stat-"]').forEach((el) => {
+    el.textContent = "Loading...";
+  });
+}
+
+function showErrorState() {
+  document.querySelectorAll('[id^="stat-"]').forEach((el) => {
+    el.textContent = "--";
+  });
 }
 
 // Initialize when DOM is loaded
 document.addEventListener("DOMContentLoaded", initDashboard);
-
-// Error handling for all cards
-function showErrorState() {
-  document.querySelectorAll('[id^="stat-total-"]').forEach((el) => {
-    el.textContent = "--";
-  });
-  document.getElementById("stat-total-revenue").textContent = "--";
-  document.getElementById("stat-total-dues").textContent = "--";
-  document.getElementById("stat-active-plans").textContent = "--";
-  document.getElementById("stat-expired-plans").textContent = "--";
-}

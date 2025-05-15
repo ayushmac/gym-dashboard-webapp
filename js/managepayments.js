@@ -889,46 +889,138 @@ document.addEventListener("DOMContentLoaded", function () {
     const record = paymentRecords.find((r) => r.id === recordId);
     if (!record) return;
 
-    // Use jsPDF to generate PDF
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // Add logo and header
-    doc.setFontSize(20);
+    // Set document properties
+    doc.setProperties({
+      title: `Payment Receipt - ${record.id}`,
+      subject: "Gym Membership Payment",
+      author: "Your Gym Name",
+      keywords: "receipt, payment, gym",
+      creator: "Gym Management System",
+    });
+
+    // Add background watermark
+    doc.setFillColor(240, 240, 240);
+    doc.rect(
+      0,
+      0,
+      doc.internal.pageSize.getWidth(),
+      doc.internal.pageSize.getHeight(),
+      "F"
+    );
+
+    // Add header with logo (replace with your actual logo if available)
+    doc.setFontSize(24);
+    doc.setTextColor(30, 80, 150); // Dark blue
+    doc.setFont("helvetica", "bold");
+    doc.text("FITNESS HUB", 105, 25, { align: "center" });
+
+    doc.setFontSize(14);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont("helvetica", "normal");
+    doc.text("Premium Fitness Center", 105, 32, { align: "center" });
+
+    // Add decorative line
+    doc.setDrawColor(30, 80, 150);
+    doc.setLineWidth(0.5);
+    doc.line(20, 38, 190, 38);
+
+    // Main receipt title
+    doc.setFontSize(18);
+    doc.setTextColor(30, 80, 150);
+    doc.setFont("helvetica", "bold");
+    doc.text("PAYMENT RECEIPT", 105, 50, { align: "center" });
+
+    // Receipt metadata
+    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Receipt No: ${record.id}`, 20, 60);
+    doc.text(`Date: ${new Date().toLocaleDateString("en-IN")}`, 160, 60, {
+      align: "right",
+    });
+
+    // Member details section
+    doc.setFillColor(30, 80, 150);
+    doc.rect(20, 70, 170, 8, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.text("MEMBER DETAILS", 105, 75, { align: "center" });
+
+    doc.setFontSize(11);
     doc.setTextColor(40, 40, 40);
-    doc.text("GYM MANAGEMENT SYSTEM", 105, 20, { align: "center" });
-    doc.setFontSize(16);
-    doc.text("PAYMENT RECEIPT", 105, 30, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.text(`Name: ${record.member_name}`, 25, 85);
+    doc.text(`Member ID: ${record.member_uid}`, 25, 90);
+    doc.text(`Contact: ${record.member_phone || "N/A"}`, 25, 95);
 
-    // Add receipt details
-    doc.setFontSize(10);
-    doc.text(`Receipt No: ${record.id}`, 15, 45);
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 15, 50);
+    // Payment details section
+    doc.setFillColor(30, 80, 150);
+    doc.rect(20, 105, 170, 8, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.text("PAYMENT DETAILS", 105, 110, { align: "center" });
 
-    // Add member details
+    doc.setFontSize(11);
+    doc.setTextColor(40, 40, 40);
+    doc.setFont("helvetica", "normal");
+
+    // Create a table-like structure for payment details
+    const paymentDetails = [
+      { label: "Plan Enrolled", value: record.plan_name },
+      { label: "Plan Type", value: record.plan_type },
+      {
+        label: "Duration",
+        value: `${record.start_date} to ${record.end_date}`,
+      },
+      { label: "Payment Method", value: record.payment_method },
+      { label: "Amount Paid", value: `Rs.${record.pre_booking_amount}` },
+      { label: "Balance Due", value: `Rs.${record.balance_due}` },
+    ];
+
+    let yPos = 120;
+    paymentDetails.forEach((item) => {
+      doc.text(`${item.label}:`, 25, yPos);
+      doc.text(item.value, 80, yPos);
+      yPos += 7;
+    });
+
+    // Total amount with highlight
     doc.setFontSize(12);
-    doc.text("Member Details:", 15, 65);
-    doc.setFontSize(10);
-    doc.text(`Name: ${record.member_name}`, 15, 70);
-    doc.text(`Member ID: ${record.member_uid}`, 15, 75);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30, 80, 150);
+    doc.text("Total Amount:", 25, yPos + 10);
+    doc.text(`Rs.${record.total_amount}`, 80, yPos + 10);
 
-    // Add payment details
-    doc.setFontSize(12);
-    doc.text("Payment Details:", 15, 90);
-    doc.setFontSize(10);
-    doc.text(`Plan Name: ${record.plan_name}`, 15, 95);
-    doc.text(`Plan Type: ${record.plan_type}`, 15, 100);
-    doc.text(`Start Date: ${record.start_date}`, 15, 105);
-    doc.text(`End Date: ${record.end_date}`, 15, 110);
-    doc.text(`Payment Method: ${record.payment_method}`, 15, 115);
-    doc.text(`Amount Paid: ₹${record.pre_booking_amount}`, 15, 120);
-    doc.text(`Balance Due: ₹${record.balance_due}`, 15, 125);
+    // Footer with signature and terms
+    doc.setDrawColor(150, 150, 150);
+    doc.line(20, yPos + 30, 190, yPos + 30);
 
-    // Add total and signature
-    doc.setFontSize(12);
-    doc.text("Total Amount: ₹" + record.total_amount, 15, 140);
-    doc.text("___________________", 140, 160);
-    doc.text("Authorized Signature", 140, 165);
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont("helvetica", "normal");
+    doc.text("Thank you for your payment!", 105, yPos + 40, {
+      align: "center",
+    });
+
+    doc.text("___________________", 30, yPos + 50);
+    doc.text("Member Signature", 30, yPos + 55);
+
+    doc.text("___________________", 140, yPos + 50);
+    doc.text("Authorized Signature", 140, yPos + 55);
+
+    // Terms and conditions
+    doc.setFontSize(8);
+    doc.text("Terms & Conditions:", 20, yPos + 65);
+    doc.text(
+      "1. This receipt must be presented for any claims.",
+      20,
+      yPos + 70
+    );
+    doc.text("2. Membership is non-transferable.", 20, yPos + 75);
+    doc.text("3. For inquiries, contact: info@yourgym.com", 20, yPos + 80);
 
     // Save the PDF
     doc.save(`Payment_Receipt_${record.id}.pdf`);

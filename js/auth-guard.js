@@ -20,8 +20,9 @@
   // Handle tab/browser close - only clear auth if not reloading
   window.addEventListener("beforeunload", (event) => {
     // Check if this is a page reload
-    const isNavigation = performance.navigation.type === performance.navigation.TYPE_RELOAD;
-    
+    const isNavigation =
+      performance.navigation.type === performance.navigation.TYPE_RELOAD;
+
     if (!isNavigation) {
       // Only clear auth if this is a tab/browser close, not a reload
       localStorage.removeItem(AUTH_KEY);

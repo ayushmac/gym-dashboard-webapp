@@ -45,28 +45,40 @@
 
           <!-- Login form -->
           <form id="admin-form" class="space-y-4 p-4 sm:p-6">
-            <!-- Email field -->
+            <!-- Username field -->
             <div>
               <label
-                for="admin-email"
+                for="admin-username"
                 class="block text-sm font-medium text-gray-300 mb-2 sm:mb-4"
               >
-                Email Address
+                Username <span class="text-red-500">*</span>
               </label>
               <div class="relative">
                 <div
                   class="absolute inset-y-0 left-2 pl-3 flex items-center pointer-events-none"
                 >
-                  <i class="fas fa-envelope text-gray-400"></i>
+                  <i class="fas fa-user text-gray-400"></i>
                 </div>
                 <input
-                  type="email"
-                  id="admin-email"
+                  type="text"
+                  id="admin-username"
                   class="w-full pl-10 pr-3 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
-                  placeholder="admin@example.com"
+                  placeholder="Enter your username"
                   required
                 />
               </div>
+              <p
+                id="login-username-error"
+                class="hidden text-red-500 text-xs mt-1"
+              >
+                Username is required
+              </p>
+              <p
+                id="username-exists-error"
+                class="hidden text-red-500 text-xs mt-1"
+              >
+                Username already exists
+              </p>
             </div>
 
             <!-- Password field -->
@@ -75,7 +87,7 @@
                 for="admin-password"
                 class="block text-sm font-medium text-gray-300 mb-2 sm:mb-4"
               >
-                Password
+                Password <span class="text-red-500">*</span>
               </label>
               <div class="relative">
                 <div
@@ -93,11 +105,23 @@
                 <button
                   type="button"
                   id="toggle-password"
-                  class="absolute inset-y-0 right-0 mr-3 flex items-center text-gray-400 hover:text-gray-300"
+                  class="cursor-pointer absolute inset-y-0 right-0 mr-3 flex items-center text-gray-400 hover:text-gray-300"
                 >
                   <i class="fas fa-eye"></i>
                 </button>
               </div>
+              <p
+                id="login-password-error"
+                class="hidden text-red-500 text-xs mt-1"
+              >
+                Password is required
+              </p>
+              <p
+                id="password-exists-error"
+                class="hidden text-red-500 text-xs mt-1"
+              >
+                Password already in use
+              </p>
             </div>
 
             <!-- Submit button -->
@@ -108,6 +132,186 @@
               <i class="fas fa-sign-in-alt mr-2"></i>
               Sign in
             </button>
+
+            <!-- Register button -->
+            <div class="text-center mt-4">
+              <button
+                type="button"
+                id="register-admin-btn"
+                class="cursor-pointer text-indigo-400 hover:text-indigo-300 text-sm font-medium"
+              >
+                Create new admin account
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div
+      id="register-modal"
+      class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+    >
+      <div
+        class="bg-gray-800 rounded-xl shadow-lg w-full max-w-md border border-gray-700"
+      >
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">Register New Admin</h2>
+            <button
+              id="register-close-btn"
+              class="cursor-pointer text-gray-400 hover:text-gray-300"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <form id="register-form" class="space-y-4">
+            <!-- Name -->
+            <div>
+              <label
+                for="register-name"
+                class="block text-sm font-medium text-gray-300 mb-2"
+              >
+                Full Name <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="register-name"
+                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                placeholder="John Doe"
+                required
+              />
+              <p
+                id="register-name-error"
+                class="hidden text-red-500 text-xs mt-1"
+              >
+                Please enter a valid name (letters only)
+              </p>
+            </div>
+
+            <!-- Username -->
+            <div>
+              <label
+                for="register-username"
+                class="block text-sm font-medium text-gray-300 mb-2"
+              >
+                Username <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="register-username"
+                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                placeholder="johndoe123"
+                required
+              />
+              <p
+                id="register-username-error"
+                class="hidden text-red-500 text-xs mt-1"
+              >
+                Username must be at least 4 characters
+              </p>
+              <p
+                id="register-username-exists-error"
+                class="hidden text-red-500 text-xs mt-1"
+              >
+                Username already exists
+              </p>
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label
+                for="register-password"
+                class="block text-sm font-medium text-gray-300 mb-2"
+              >
+                Password <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <input
+                  type="password"
+                  id="register-password"
+                  class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  id="toggle-register-password"
+                  class="cursor-pointer absolute inset-y-0 right-0 mr-3 flex items-center text-gray-400 hover:text-gray-300"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              <p
+                id="register-password-error"
+                class="hidden text-red-500 text-xs mt-1"
+              >
+                Password must be at least 6 characters
+              </p>
+              <p
+                id="register-password-exists-error"
+                class="hidden text-red-500 text-xs mt-1"
+              >
+                Password already in use
+              </p>
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label
+                for="register-email"
+                class="block text-sm font-medium text-gray-300 mb-2"
+              >
+                Email <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                id="register-email"
+                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                placeholder="john@example.com"
+                required
+              />
+              <p
+                id="register-email-error"
+                class="hidden text-red-500 text-xs mt-1"
+              >
+                Please enter a valid email
+              </p>
+            </div>
+
+            <!-- Phone -->
+            <div>
+              <label
+                for="register-phone"
+                class="block text-sm font-medium text-gray-300 mb-2"
+              >
+                Phone Number <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                id="register-phone"
+                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                placeholder="1234567890"
+                required
+              />
+              <p
+                id="register-phone-error"
+                class="hidden text-red-500 text-xs mt-1"
+              >
+                Please enter a valid 10-digit phone number
+              </p>
+            </div>
+
+            <div class="flex justify-end pt-2">
+              <button
+                type="submit"
+                class="cursor-pointer px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
+              >
+                Register
+              </button>
+            </div>
           </form>
         </div>
       </div>
@@ -122,7 +326,7 @@
         <div
           class="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"
         ></div>
-        <p class="mt-4 text-white">Authenticating...</p>
+        <p id="loader-text" class="mt-4 text-white">Authenticating...</p>
       </div>
     </div>
 

@@ -304,17 +304,17 @@ document.addEventListener("DOMContentLoaded", function () {
       role: document.getElementById("staff-role").value.trim(),
       salary: document.getElementById("staff-salary").value,
       joinedDate: document.getElementById("staff-joined").value,
-      uid: "",
+      staff_uid: "",
     };
 
     try {
       if (isEditing && currentEditId) {
-        formData.uid = currentEditId;
+        formData.staff_uid = currentEditId;
         await update(ref(database, `staff/${currentEditId}`), formData);
         showToast("Staff updated successfully", "success");
       } else {
         const newStaffRef = push(staffRef);
-        formData.uid = newStaffRef.key;
+        formData.staff_uid = newStaffRef.key;
         await set(newStaffRef, formData);
         showToast("Staff added successfully", "success");
       }
